@@ -32,29 +32,99 @@
         />
       </div>
   
-      <div class="control-group">
-        <label class="control-label">质量等级</label>
-        <div class="quality-selector">
-          <div 
-            class="quality-option"
-            :class="{ active: quality === 'fast' }"
-            @click="$emit('update:quality', 'fast')"
-          >
-            速翻
+      <!-- 模式选择按钮组 -->
+      <div class="mode-buttons">
+        <div 
+          class="mode-button"
+          :class="{ 
+            active: mode === 'zh-ar',
+            expanded: expandedMode === 'zh-ar'
+          }"
+          @click="handleModeClick('zh-ar')"
+        >
+          <span class="mode-label">中-阿</span>
+          <div v-if="expandedMode === 'zh-ar'" class="expanded-controls">
+            <el-button 
+              type="primary" 
+              size="small"
+              @click.stop="$emit('analyze')"
+            >
+              翻译策略
+            </el-button>
+            <div class="quality-selector">
+              <div 
+                class="quality-option"
+                :class="{ active: quality === 'fast' }"
+                @click.stop="$emit('update:quality', 'fast')"
+              >
+                速翻
+              </div>
+              <div 
+                class="quality-option"
+                :class="{ active: quality === 'standard' }"
+                @click.stop="$emit('update:quality', 'standard')"
+              >
+                标准
+              </div>
+              <div 
+                class="quality-option"
+                :class="{ active: quality === 'premium' }"
+                @click.stop="$emit('update:quality', 'premium')"
+              >
+                精修
+              </div>
+            </div>
           </div>
-          <div 
-            class="quality-option"
-            :class="{ active: quality === 'standard' }"
-            @click="$emit('update:quality', 'standard')"
-          >
-            标准
-          </div>
-          <div 
-            class="quality-option"
-            :class="{ active: quality === 'premium' }"
-            @click="$emit('update:quality', 'premium')"
-          >
-            精修
+        </div>
+
+        <div 
+          class="mode-button"
+          :class="{ active: mode === 'evaluate' }"
+          @click="handleModeClick('evaluate')"
+        >
+          <span class="mode-label">评估模式</span>
+        </div>
+
+        <div 
+          class="mode-button"
+          :class="{ 
+            active: mode === 'ar-zh',
+            expanded: expandedMode === 'ar-zh'
+          }"
+          @click="handleModeClick('ar-zh')"
+        >
+          <span class="mode-label">阿-中</span>
+          <div v-if="expandedMode === 'ar-zh'" class="expanded-controls">
+            <el-button 
+              type="primary" 
+              size="small"
+              @click.stop="$emit('analyze')"
+            >
+              翻译策略
+            </el-button>
+            <div class="quality-selector">
+              <div 
+                class="quality-option"
+                :class="{ active: quality === 'fast' }"
+                @click.stop="$emit('update:quality', 'fast')"
+              >
+                速翻
+              </div>
+              <div 
+                class="quality-option"
+                :class="{ active: quality === 'standard' }"
+                @click.stop="$emit('update:quality', 'standard')"
+              >
+                标准
+              </div>
+              <div 
+                class="quality-option"
+                :class="{ active: quality === 'premium' }"
+                @click.stop="$emit('update:quality', 'premium')"
+              >
+                精修
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -82,7 +152,7 @@
   <script setup>
   import { Refresh } from '@element-plus/icons-vue'
   import { ElSwitch } from 'element-plus'
-  import { computed } from 'vue'
+  import { computed, ref } from 'vue'
   
   const props = defineProps({
     intent: String,
@@ -93,6 +163,10 @@
       type: String,
       default: 'standard'
     },
+    mode: {
+      type: String,
+      default: 'zh-ar'
+    },
     loading: Boolean
   })
   
@@ -102,8 +176,26 @@
     'update:reference',
     'update:directRequest',
     'update:quality',
+    'update:mode',
+    'analyze',
     'translate'
   ])
+
+  const expandedMode = ref(null)
+
+  const handleModeClick = (mode) => {
+    if (mode === 'evaluate') {
+      // 评估模式暂不实现
+      return
+    }
+    
+    if (expandedMode.value === mode) {
+      expandedMode.value = null
+    } else {
+      expandedMode.value = mode
+      emit('update:mode', mode)
+    }
+  }
   </script>
   
   <style scoped>
@@ -130,6 +222,58 @@
   }
   
   .control-input {
+    width: 100%;
+  }
+  
+  .mode-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  
+  .mode-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #f5f7fa;
+    border: 2px solid #dcdfe6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+  
+  .mode-button:hover {
+    border-color: #1E3050;
+  }
+  
+  .mode-button.active {
+    background: #1E3050;
+    border-color: #1E3050;
+    color: white;
+  }
+  
+  .mode-button.expanded {
+    width: 200px;
+    height: auto;
+    border-radius: 12px;
+    padding: 12px;
+  }
+  
+  .mode-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .expanded-controls {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     width: 100%;
   }
   

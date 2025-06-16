@@ -1,6 +1,6 @@
 <template>
     <div class="analysis-panel">
-      <h3>翻译辅助</h3>
+      <h3>翻译分析</h3>
       
       <!-- 文本特征分析 -->
       <div v-if="analysisData?.textFeatures" class="analysis-section">
@@ -37,7 +37,7 @@
   
       <!-- 加载状态 -->
       <div v-if="!analysisData" class="empty-state">
-        <p>输入文本后将显示分析结果</p>
+        <p>点击"翻译策略"按钮开始分析</p>
       </div>
     </div>
   </template>

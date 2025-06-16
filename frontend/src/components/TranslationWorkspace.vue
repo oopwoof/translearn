@@ -1,23 +1,5 @@
 <template>
     <div class="translation-workspace">
-      <!-- 顶部模式选择器 -->
-      <div class="mode-selector">
-        <div 
-          class="mode-tab" 
-          :class="{ active: translationMode === 'zh-ar' }"
-          @click="setTranslationMode('zh-ar')"
-        >
-          中文 → 阿拉伯语
-        </div>
-        <div 
-          class="mode-tab" 
-          :class="{ active: translationMode === 'ar-zh' }"
-          @click="setTranslationMode('ar-zh')"
-        >
-          阿拉伯语 → 中文
-        </div>
-      </div>
-  
       <!-- 主工作区 -->
       <div class="workspace">
         <!-- 左侧解析区 -->
@@ -50,8 +32,8 @@
           v-model:reference="translationRequirements.reference"
           v-model:directRequest="translationRequirements.directRequest"
           v-model:quality="translationRequirements.quality"
-          @translate="handleTranslate"
-          :loading="isTranslating"
+          v-model:mode="translationMode"
+          @analyze="handleAnalyze"
         />
         
         <!-- 中文区 -->
@@ -78,7 +60,7 @@
   </template>
   
   <script setup>
-  import { ref, reactive, watch } from 'vue'
+  import { ref, reactive } from 'vue'
   import { ElMessage } from 'element-plus'
   import AnalysisPanel from './AnalysisPanel.vue'
   import ArabicPanel from './ArabicPanel.vue'
@@ -108,43 +90,32 @@
   const analysisData = ref(null)
   const isTranslating = ref(false)
   
-  // 设置翻译模式
-  const setTranslationMode = (mode) => {
-    translationMode.value = mode
-    // 清空文本
-    chineseText.value = ''
-    arabicText.value = ''
-    analysisData.value = null
-  }
-  
-  // 处理翻译
-  const handleTranslate = async () => {
+  // 处理分析
+  const handleAnalyze = async () => {
     const sourceText = translationMode.value === 'zh-ar' ? chineseText.value : arabicText.value
     
     if (!sourceText.trim()) {
-      ElMessage.warning('请输入要翻译的文本')
+      ElMessage.warning('请输入要分析的文本')
       return
     }
   
     isTranslating.value = true
   
     try {
-      const result = await translationStore.translateWithAnalysis(
-        sourceText,
-        translationMode.value,
-        translationRequirements
-      )
-  
-      if (translationMode.value === 'zh-ar') {
-        arabicText.value = result.translatedText
-      } else {
-        chineseText.value = result.translatedText
+      // 这里暂时使用占位分析数据
+      analysisData.value = {
+        textFeatures: {
+          type: '一般文本',
+          style: '中性语体'
+        },
+        terminology: [],
+        suggestions: ['分析功能开发中...'],
+        analyzedAt: new Date().toISOString()
       }
-  
-      analysisData.value = result.analysis
-      ElMessage.success('翻译完成！')
+      
+      ElMessage.success('分析完成！')
     } catch (error) {
-      ElMessage.error(error.message || '翻译失败')
+      ElMessage.error(error.message || '分析失败')
     } finally {
       isTranslating.value = false
     }
@@ -156,31 +127,6 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: #f5f7fa;
-  }
-  
-  .mode-selector {
-    display: flex;
-    background: white;
-    border-bottom: 1px solid #e4e7ed;
-    padding: 0 20px;
-  }
-  
-  .mode-tab {
-    padding: 15px 30px;
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s;
-    font-weight: 500;
-  }
-  
-  .mode-tab:hover {
-    background: #f5f7fa;
-  }
-  
-  .mode-tab.active {
-    border-bottom-color: #1E3050;
-    color: #1E3050;
     background: #f5f7fa;
   }
   
@@ -198,21 +144,6 @@
       grid-template-columns: 1fr;
       grid-template-rows: auto auto auto auto;
     }
-  }
-  
-  .show-result-btn {
-    margin: 20px auto;
-    display: block;
-    padding: 8px 24px;
-    font-size: 16px;
-    background: #1E3050;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  .show-result-btn:hover {
-    background: #274472;
   }
   </style>
   
