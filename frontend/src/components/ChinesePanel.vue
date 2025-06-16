@@ -27,7 +27,7 @@
       
       <div class="text-area">
         <el-input
-          :model-value="(hideResultOnTranslate && !showResult && readonly) ? '' : modelValue"
+          :model-value="modelValue"
           @update:model-value="$emit('update:modelValue', $event)"
           type="textarea"
           :rows="20"
@@ -35,9 +35,6 @@
           :readonly="readonly"
           class="chinese-input"
         />
-        <div v-if="hideResultOnTranslate && !showResult && readonly && modelValue" class="show-result-placeholder">
-          <button class="show-result-btn" @click="onShowResult && onShowResult()">显示翻译</button>
-        </div>
         
         <!-- 加载遮罩 -->
         <div v-if="loading && readonly" class="loading-overlay">
@@ -74,18 +71,6 @@
     placeholder: {
       type: String,
       default: ''
-    },
-    showResult: {
-      type: Boolean,
-      default: true
-    },
-    hideResultOnTranslate: {
-      type: Boolean,
-      default: false
-    },
-    onShowResult: {
-      type: Function,
-      default: null
     }
   })
   
@@ -184,32 +169,6 @@
   .char-count {
     color: #666;
     font-size: 14px;
-  }
-  
-  .show-result-placeholder {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2;
-  }
-  .show-result-btn {
-    padding: 10px 32px;
-    font-size: 18px;
-    background: #1E3050;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(30,48,80,0.08);
-    transition: background 0.2s;
-  }
-  .show-result-btn:hover {
-    background: #274472;
   }
   </style>
 

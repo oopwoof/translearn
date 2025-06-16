@@ -31,10 +31,7 @@
               :readonly="true"
               :loading="isTranslating"
               :model-value="arabicText"
-              :placeholder="hideResultOnTranslate && !showArabicResult ? '' : '翻译结果将显示在这里...'"
-              :show-result="showArabicResult"
-              :hide-result-on-translate="hideResultOnTranslate"
-              :on-show-result="() => { showArabicResult = true }"
+              :placeholder="'翻译结果将显示在这里...'"
             />
           </template>
           <template v-else>
@@ -55,8 +52,6 @@
           v-model:quality="translationRequirements.quality"
           @translate="handleTranslate"
           :loading="isTranslating"
-          :hide-result-on-translate="hideResultOnTranslate"
-          @toggle-hide-result="hideResultOnTranslate = $event"
         />
         
         <!-- 中文区 -->
@@ -67,10 +62,7 @@
               :readonly="true"
               :loading="isTranslating"
               :model-value="chineseText"
-              :placeholder="hideResultOnTranslate && !showChineseResult ? '' : '翻译结果将显示在这里...'"
-              :show-result="showChineseResult"
-              :hide-result-on-translate="hideResultOnTranslate"
-              :on-show-result="() => { showChineseResult = true }"
+              :placeholder="'翻译结果将显示在这里...'"
             />
           </template>
           <template v-else>
@@ -116,13 +108,6 @@
   const analysisData = ref(null)
   const isTranslating = ref(false)
   
-  // 显示状态
-  const showArabicResult = ref(false)
-  const showChineseResult = ref(false)
-  
-  // 新增：隐藏模式开关
-  const hideResultOnTranslate = ref(true)
-  
   // 设置翻译模式
   const setTranslationMode = (mode) => {
     translationMode.value = mode
@@ -152,10 +137,8 @@
   
       if (translationMode.value === 'zh-ar') {
         arabicText.value = result.translatedText
-        showArabicResult.value = !hideResultOnTranslate.value // 根据开关决定是否直接显示
       } else {
         chineseText.value = result.translatedText
-        showChineseResult.value = !hideResultOnTranslate.value
       }
   
       analysisData.value = result.analysis

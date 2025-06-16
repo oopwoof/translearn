@@ -75,15 +75,6 @@
           </template>
           {{ loading ? '翻译中...' : '开始翻译' }}
         </el-button>
-        <div class="hide-switch-group">
-          <span class="hide-switch-label">隐藏模式</span>
-          <el-switch
-            v-model="hideSwitchProxy"
-            active-color="#1E3050"
-            inactive-color="#dcdfe6"
-            style="--el-switch-on-color: #1E3050; --el-switch-off-color: #dcdfe6;"
-          />
-        </div>
       </div>
     </div>
   </template>
@@ -102,11 +93,7 @@
       type: String,
       default: 'standard'
     },
-    loading: Boolean,
-    hideResultOnTranslate: {
-      type: Boolean,
-      default: true
-    }
+    loading: Boolean
   })
   
   const emit = defineEmits([
@@ -115,14 +102,8 @@
     'update:reference',
     'update:directRequest',
     'update:quality',
-    'translate',
-    'toggle-hide-result'
+    'translate'
   ])
-  
-  const hideSwitchProxy = computed({
-    get: () => props.hideResultOnTranslate,
-    set: v => emit('toggle-hide-result', v)
-  })
   </script>
   
   <style scoped>
@@ -187,19 +168,6 @@
     margin-top: 20px;
     height: 48px;
     font-size: 16px;
-    font-weight: 500;
-  }
-  
-  .hide-switch-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-left: 12px;
-  }
-  
-  .hide-switch-label {
-    font-size: 15px;
-    color: #1E3050;
     font-weight: 500;
   }
   </style>
