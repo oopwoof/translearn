@@ -3,8 +3,8 @@
       <div class="control-group">
         <label class="control-label">意图/受众</label>
         <el-input
-          :model-value="intent"
-          @update:model-value="$emit('update:intent', $event)"
+          v-model="localIntent"
+          @update:model-value="updateIntent"
           placeholder="如：商务伙伴、学术交流..."
           class="control-input"
         />
@@ -13,8 +13,8 @@
       <div class="control-group">
         <label class="control-label">参考译文风格</label>
         <el-input
-          :model-value="reference"
-          @update:model-value="$emit('update:reference', $event)"
+          v-model="localReference"
+          @update:model-value="updateReference"
           type="textarea"
           :rows="3"
           placeholder="粘贴或输入参考译文..."
@@ -25,8 +25,8 @@
       <div class="control-group">
         <label class="control-label">直接要求</label>
         <el-input
-          :model-value="directRequest"
-          @update:model-value="$emit('update:directRequest', $event)"
+          v-model="localDirectRequest"
+          @update:model-value="updateDirectRequest"
           placeholder="如：保留礼貌用语、使用正式语体..."
           class="control-input"
         />
@@ -44,45 +44,39 @@
         >
           <span class="mode-label">中-阿</span>
           <div v-if="expandedMode === 'zh-ar'" class="expanded-controls">
-            <el-button 
-              type="primary" 
-              size="small"
-              @click.stop="$emit('analyze')"
-            >
-              翻译策略
-            </el-button>
             <div class="quality-selector">
               <div 
                 class="quality-option"
                 :class="{ active: quality === 'fast' }"
-                @click.stop="$emit('update:quality', 'fast')"
+                @click.stop="updateQuality('fast')"
               >
                 速翻
               </div>
               <div 
                 class="quality-option"
                 :class="{ active: quality === 'standard' }"
-                @click.stop="$emit('update:quality', 'standard')"
+                @click.stop="updateQuality('standard')"
               >
                 标准
               </div>
               <div 
                 class="quality-option"
                 :class="{ active: quality === 'premium' }"
-                @click.stop="$emit('update:quality', 'premium')"
+                @click.stop="updateQuality('premium')"
               >
                 精修
               </div>
             </div>
+            <el-button 
+              type="primary" 
+              size="small"
+              @click.stop="handleTranslate"
+              :disabled="!quality"
+              :loading="loading"
+            >
+              {{ loading ? '翻译中...' : '开始翻译' }}
+            </el-button>
           </div>
-        </div>
-
-        <div 
-          class="mode-button"
-          :class="{ active: mode === 'evaluate' }"
-          @click="handleModeClick('evaluate')"
-        >
-          <span class="mode-label">评估模式</span>
         </div>
 
         <div 
@@ -95,73 +89,54 @@
         >
           <span class="mode-label">阿-中</span>
           <div v-if="expandedMode === 'ar-zh'" class="expanded-controls">
-            <el-button 
-              type="primary" 
-              size="small"
-              @click.stop="$emit('analyze')"
-            >
-              翻译策略
-            </el-button>
             <div class="quality-selector">
               <div 
                 class="quality-option"
                 :class="{ active: quality === 'fast' }"
-                @click.stop="$emit('update:quality', 'fast')"
+                @click.stop="updateQuality('fast')"
               >
                 速翻
               </div>
               <div 
                 class="quality-option"
                 :class="{ active: quality === 'standard' }"
-                @click.stop="$emit('update:quality', 'standard')"
+                @click.stop="updateQuality('standard')"
               >
                 标准
               </div>
               <div 
                 class="quality-option"
                 :class="{ active: quality === 'premium' }"
-                @click.stop="$emit('update:quality', 'premium')"
+                @click.stop="updateQuality('premium')"
               >
                 精修
               </div>
             </div>
+            <el-button 
+              type="primary" 
+              size="small"
+              @click.stop="handleTranslate"
+              :disabled="!quality"
+              :loading="loading"
+            >
+              {{ loading ? '翻译中...' : '开始翻译' }}
+            </el-button>
           </div>
         </div>
-      </div>
-  
-      <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between;">
-        <el-button 
-          type="primary" 
-          size="large"
-          @click="$emit('translate')"
-          :loading="loading"
-          class="translate-btn"
-          block
-        >
-          <template #loading>
-            <el-icon class="is-loading">
-              <Refresh />
-            </el-icon>
-          </template>
-          {{ loading ? '翻译中...' : '开始翻译' }}
-        </el-button>
       </div>
     </div>
   </template>
   
   <script setup>
-  import { Refresh } from '@element-plus/icons-vue'
-  import { ElSwitch } from 'element-plus'
-  import { computed, ref } from 'vue'
+  import { ref, watch } from 'vue'
   
   const props = defineProps({
     intent: String,
-    audience: String,
     reference: String,
     directRequest: String,
     quality: {
       type: String,
-      default: 'standard'
+      default: ''
     },
     mode: {
       type: String,
@@ -172,29 +147,61 @@
   
   const emit = defineEmits([
     'update:intent',
-    'update:audience', 
     'update:reference',
     'update:directRequest',
     'update:quality',
     'update:mode',
-    'analyze',
     'translate'
   ])
 
   const expandedMode = ref(null)
+  const localIntent = ref(props.intent || '')
+  const localReference = ref(props.reference || '')
+  const localDirectRequest = ref(props.directRequest || '')
+
+  // 监听props变化
+  watch(() => props.intent, (newVal) => {
+    localIntent.value = newVal || ''
+  })
+
+  watch(() => props.reference, (newVal) => {
+    localReference.value = newVal || ''
+  })
+
+  watch(() => props.directRequest, (newVal) => {
+    localDirectRequest.value = newVal || ''
+  })
+
+  const updateIntent = (value) => {
+    localIntent.value = value
+    emit('update:intent', value)
+  }
+
+  const updateReference = (value) => {
+    localReference.value = value
+    emit('update:reference', value)
+  }
+
+  const updateDirectRequest = (value) => {
+    localDirectRequest.value = value
+    emit('update:directRequest', value)
+  }
+
+  const updateQuality = (value) => {
+    emit('update:quality', value)
+  }
 
   const handleModeClick = (mode) => {
-    if (mode === 'evaluate') {
-      // 评估模式暂不实现
-      return
-    }
-    
     if (expandedMode.value === mode) {
       expandedMode.value = null
     } else {
       expandedMode.value = mode
       emit('update:mode', mode)
     }
+  }
+
+  const handleTranslate = () => {
+    emit('translate')
   }
   </script>
   
@@ -306,13 +313,6 @@
   .quality-option.active {
     background: #1E3050;
     color: white;
-  }
-  
-  .translate-btn {
-    margin-top: 20px;
-    height: 48px;
-    font-size: 16px;
-    font-weight: 500;
   }
   </style>
   

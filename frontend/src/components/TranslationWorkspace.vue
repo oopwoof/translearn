@@ -1,146 +1,165 @@
 <template>
     <div class="translation-workspace">
-      <!-- 主工作区 -->
-      <div class="workspace">
-        <!-- 左侧解析区 -->
-        <AnalysisPanel :analysis-data="analysisData" />
-        
-        <!-- 阿语区 -->
-        <div>
-          <template v-if="translationMode === 'zh-ar'">
-            <ArabicPanel
-              v-model="arabicText"
-              :readonly="true"
-              :loading="isTranslating"
-              :model-value="arabicText"
-              :placeholder="'翻译结果将显示在这里...'"
-            />
-          </template>
-          <template v-else>
-            <ArabicPanel
-              v-model="arabicText"
-              :readonly="false"
-              :loading="isTranslating"
-            />
-          </template>
-        </div>
-        
-        <!-- 翻译要求区 -->
-        <TranslationControls 
-          v-model:intent="translationRequirements.intent"
-          v-model:audience="translationRequirements.audience"
-          v-model:reference="translationRequirements.reference"
-          v-model:directRequest="translationRequirements.directRequest"
-          v-model:quality="translationRequirements.quality"
-          v-model:mode="translationMode"
-          @analyze="handleAnalyze"
-        />
-        
-        <!-- 中文区 -->
-        <div>
-          <template v-if="translationMode === 'ar-zh'">
-            <ChinesePanel
-              v-model="chineseText"
-              :readonly="true"
-              :loading="isTranslating"
-              :model-value="chineseText"
-              :placeholder="'翻译结果将显示在这里...'"
-            />
-          </template>
-          <template v-else>
-            <ChinesePanel
-              v-model="chineseText"
-              :readonly="false"
-              :loading="isTranslating"
-            />
-          </template>
+      <FunctionArea :mode="mode" />
+      <div class="workspace-container">
+        <div class="panel-container">
+          <AnalysisPanel 
+            :analysis-data="analysisData"
+            :analyzing="analyzing"
+            @analyze="handleAnalyze"
+          />
+          <ArabicPanel
+            v-model="targetText"
+            :readonly="mode === 'zh-ar'"
+            :loading="isTranslating"
+          />
+          <TranslationControls
+            v-model:intent="intent"
+            v-model:reference="reference"
+            v-model:directRequest="directRequest"
+            :mode="mode"
+            :quality="quality"
+            :loading="isTranslating"
+            @update:mode="handleModeChange"
+            @update:quality="handleQualityChange"
+            @translate="handleTranslate"
+          />
+          <ChinesePanel
+            v-model="textToAnalyze"
+            :readonly="mode === 'ar-zh'"
+            :loading="isTranslating"
+          />
         </div>
       </div>
     </div>
   </template>
   
   <script setup>
-  import { ref, reactive } from 'vue'
+  import { ref, watch } from 'vue'
   import { ElMessage } from 'element-plus'
-  import AnalysisPanel from './AnalysisPanel.vue'
-  import ArabicPanel from './ArabicPanel.vue'
   import ChinesePanel from './ChinesePanel.vue'
+  import ArabicPanel from './ArabicPanel.vue'
   import TranslationControls from './TranslationControls.vue'
+  import FunctionArea from './FunctionArea.vue'
+  import AnalysisPanel from './AnalysisPanel.vue'
   import { useTranslationStore } from '@/stores/translation'
   
   const translationStore = useTranslationStore()
   
-  // 翻译模式：zh-ar (中翻阿) 或 ar-zh (阿翻中)
-  const translationMode = ref('zh-ar')
-  
-  // 文本内容
-  const chineseText = ref('')
-  const arabicText = ref('')
-  
-  // 翻译要求
-  const translationRequirements = reactive({
-    intent: '',
-    audience: '',
-    reference: '',
-    directRequest: '',
-    quality: 'standard'
-  })
-  
-  // 分析数据
+  const mode = ref('zh-ar')
+  const quality = ref('')
+  const textToAnalyze = ref('')
+  const targetText = ref('')
   const analysisData = ref(null)
   const isTranslating = ref(false)
+  const intent = ref('')
+  const reference = ref('')
+  const directRequest = ref('')
+  const analyzing = ref(false)
   
-  // 处理分析
-  const handleAnalyze = async () => {
-    const sourceText = translationMode.value === 'zh-ar' ? chineseText.value : arabicText.value
-    
-    if (!sourceText.trim()) {
-      ElMessage.warning('请输入要分析的文本')
+  // 监听模式变化
+  watch(mode, (newMode) => {
+    // 清空文本和分析结果
+    textToAnalyze.value = ''
+    targetText.value = ''
+    analysisData.value = null
+    quality.value = ''
+  })
+  
+  const handleModeChange = (newMode) => {
+    mode.value = newMode
+  }
+  
+  const handleAnalyze = async (selectedBalls) => {
+    if (!textToAnalyze.value) {
+      ElMessage.warning('请先输入要分析的文本')
       return
     }
-  
-    isTranslating.value = true
-  
+    
+    if (!selectedBalls || selectedBalls.length === 0) {
+      ElMessage.warning('请先拖入功能球')
+      return
+    }
+    
+    analyzing.value = true
     try {
-      // 这里暂时使用占位分析数据
-      analysisData.value = {
-        textFeatures: {
-          type: '一般文本',
-          style: '中性语体'
-        },
-        terminology: [],
-        suggestions: ['分析功能开发中...'],
-        analyzedAt: new Date().toISOString()
-      }
-      
-      ElMessage.success('分析完成！')
+      // 只使用被拖入的功能球的prompt
+      const prompts = selectedBalls.map(ball => ball.prompt)
+      console.log('Using prompts from selected balls:', prompts)
+      const result = await translationStore.analyzeText(textToAnalyze.value, prompts)
+      analysisData.value = result
+      ElMessage.success('分析完成')
     } catch (error) {
       ElMessage.error(error.message || '分析失败')
     } finally {
+      analyzing.value = false
+    }
+  }
+  
+  const handleTranslate = async () => {
+    if (!textToAnalyze.value) {
+      ElMessage.warning('请输入要翻译的文本')
+      return
+    }
+    
+    if (!quality.value) {
+      ElMessage.warning('请选择翻译质量')
+      return
+    }
+    
+    try {
+      isTranslating.value = true
+      const result = await translationStore.translateText(textToAnalyze.value, quality.value)
+      targetText.value = result
+      ElMessage.success('翻译完成')
+    } catch (error) {
+      ElMessage.error(error.message || '翻译失败')
+    } finally {
       isTranslating.value = false
     }
+  }
+  
+  const handleQualityChange = (newQuality) => {
+    quality.value = newQuality
   }
   </script>
   
   <style scoped>
   .translation-workspace {
-    height: 100vh;
     display: flex;
     flex-direction: column;
+    height: 100vh;
     background: #f5f7fa;
-  }
-  
-  .workspace {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 300px 1fr 250px 1fr;
-    gap: 20px;
-    padding: 20px;
     overflow: hidden;
   }
   
+  .workspace-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+    overflow: hidden;
+    min-height: 0;
+  }
+  
+  .panel-container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 300px 1fr 300px 1fr;
+    gap: 20px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  
+  @media (max-width: 1600px) {
+    .panel-container {
+      grid-template-columns: 250px 1fr 250px 1fr;
+    }
+  }
+  
   @media (max-width: 1200px) {
-    .workspace {
+    .panel-container {
       grid-template-columns: 1fr;
       grid-template-rows: auto auto auto auto;
     }

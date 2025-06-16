@@ -212,6 +212,164 @@ function getQualityDescription(quality) {
   return descriptions[quality] || descriptions.standard
 }
 
+// 构建分析提示词
+function buildAnalysisPrompt(text, prompts) {
+  let prompt = `请分析以下文本：\n\n${text}\n\n`
+  
+  prompt += `请按照以下要求进行分析：\n\n`
+  
+  // 只使用传入的prompts进行分析
+  prompts.forEach((p, index) => {
+    prompt += `${index + 1}. ${p}\n`
+  })
+  
+  prompt += `\n请严格按照以下格式提供回复：\n\n`
+  
+  // 根据传入的prompts动态构建响应格式
+  let responseFormat = ''
+  if (prompts.some(p => p.includes('文本特征'))) {
+    responseFormat += `1. 文本特征：\n[分析文本类型和语体风格]\n\n`
+  }
+  if (prompts.some(p => p.includes('专业术语'))) {
+    responseFormat += `2. 专业术语：\n[列出重要术语及其解释]\n\n`
+  }
+  if (prompts.some(p => p.includes('翻译建议'))) {
+    responseFormat += `3. 翻译建议：\n[提供具体的翻译改进建议]\n`
+  }
+  
+  prompt += responseFormat
+  return prompt
+}
+
+// 解析分析响应
+function parseAnalysisResponse(response, prompts) {
+  try {
+    const sections = response.split(/\d+\.\s*/)
+    
+    let textFeatures = { type: '一般文本', style: '中性语体' }
+    let terminology = []
+    let suggestions = []
+
+    // 只解析被请求的部分
+    if (prompts.some(p => p.includes('文本特征'))) {
+      const featuresSection = sections.find(section => 
+        section.includes('文本特征') || section.includes('特征分析')
+      )
+      
+      if (featuresSection) {
+        if (featuresSection.includes('商务') || featuresSection.includes('商业')) {
+          textFeatures.type = '商务文本'
+        } else if (featuresSection.includes('学术') || featuresSection.includes('研究')) {
+          textFeatures.type = '学术文本'
+        } else if (featuresSection.includes('法律') || featuresSection.includes('合同')) {
+          textFeatures.type = '法律文本'
+        }
+
+        if (featuresSection.includes('正式') || featuresSection.includes('官方')) {
+          textFeatures.style = '正式语体'
+        } else if (featuresSection.includes('礼貌') || featuresSection.includes('客气')) {
+          textFeatures.style = '礼貌语体'
+        }
+      }
+    }
+
+    if (prompts.some(p => p.includes('专业术语'))) {
+      const terminologySection = sections.find(section => 
+        section.includes('专业术语') || section.includes('术语')
+      )
+      
+      if (terminologySection) {
+        const termLines = terminologySection.split('\n')
+        termLines.forEach(line => {
+          const match = line.match(/(.+?)[：:]\s*(.+)/)
+          if (match) {
+            terminology.push({
+              original: match[1].trim(),
+              translation: match[2].trim()
+            })
+          }
+        })
+      }
+    }
+
+    if (prompts.some(p => p.includes('翻译建议'))) {
+      const suggestionsSection = sections.find(section => 
+        section.includes('建议') || section.includes('改进')
+      )
+      
+      if (suggestionsSection) {
+        const suggestionLines = suggestionsSection.split('\n')
+        suggestions = suggestionLines
+          .filter(line => line.trim() && !line.includes('建议'))
+          .map(line => line.replace(/^[-•]\s*/, '').trim())
+          .filter(line => line.length > 0)
+      }
+    }
+
+    return {
+      textFeatures: prompts.some(p => p.includes('文本特征')) ? textFeatures : null,
+      terminology: prompts.some(p => p.includes('专业术语')) ? terminology : [],
+      suggestions: prompts.some(p => p.includes('翻译建议')) ? suggestions : [],
+      analyzedAt: new Date().toISOString()
+    }
+
+  } catch (error) {
+    console.error('解析响应错误:', error)
+    return {
+      textFeatures: prompts.some(p => p.includes('文本特征')) ? { type: '一般文本', style: '中性语体' } : null,
+      terminology: prompts.some(p => p.includes('专业术语')) ? [] : [],
+      suggestions: prompts.some(p => p.includes('翻译建议')) ? ['分析完成，建议人工校对'] : [],
+      analyzedAt: new Date().toISOString()
+    }
+  }
+}
+
+// 分析接口
+router.post('/analyze', async (req, res) => {
+  try {
+    const { text, prompts } = req.body
+
+    if (!text || !text.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: '文本不能为空'
+      })
+    }
+
+    if (!prompts || !prompts.length) {
+      return res.status(400).json({
+        success: false,
+        message: '请选择分析功能'
+      })
+    }
+
+    console.log('开始分析:', { text: text.substring(0, 50) + '...', prompts })
+
+    // 构建分析提示词
+    const prompt = buildAnalysisPrompt(text, prompts)
+    
+    // 调用Claude API
+    const claudeResponse = await callClaudeAPI(prompt)
+    
+    console.log('Claude响应:', claudeResponse.substring(0, 200) + '...')
+    
+    // 解析响应，传入prompts以确定需要解析哪些部分
+    const result = parseAnalysisResponse(claudeResponse, prompts)
+    
+    res.json({
+      success: true,
+      data: result
+    })
+
+  } catch (error) {
+    console.error('Analysis error:', error)
+    res.status(500).json({
+      success: false,
+      message: error.message || '分析服务暂时不可用'
+    })
+  }
+})
+
 // 测试接口
 router.get('/test', async (req, res) => {
   try {

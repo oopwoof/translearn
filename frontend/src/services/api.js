@@ -54,6 +54,14 @@ export const translationAPI = {
     })
   },
 
+  // 分析文本
+  analyzeText: async (text, prompts) => {
+    return api.post('/translate/analyze', {
+      text,
+      prompts
+    })
+  },
+
   // 测试API连接
   testConnection: async () => {
     return api.get('/translate/test')

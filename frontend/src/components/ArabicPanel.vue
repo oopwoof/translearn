@@ -31,7 +31,7 @@
           @update:model-value="$emit('update:modelValue', $event)"
           type="textarea"
           :rows="20"
-          :placeholder="''"
+          :placeholder="readonly ? '翻译结果将显示在这里...' : '请输入阿拉伯语文本...'"
           :readonly="readonly"
           class="arabic-input"
           dir="rtl"
@@ -68,10 +68,6 @@
     loading: {
       type: Boolean,
       default: false
-    },
-    placeholder: {
-      type: String,
-      default: ''
     }
   })
   
@@ -98,7 +94,9 @@
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 140px);
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
   
   .panel-header {
@@ -107,6 +105,7 @@
     align-items: center;
     padding: 16px 20px;
     border-bottom: 1px solid #e4e7ed;
+    flex-shrink: 0;
   }
   
   .panel-header h4 {
@@ -124,6 +123,8 @@
     flex: 1;
     padding: 20px;
     position: relative;
+    min-height: 0;
+    overflow: hidden;
   }
   
   .arabic-input {
@@ -138,6 +139,7 @@
     font-family: 'Noto Sans Arabic', 'Arial Unicode MS', sans-serif;
     direction: rtl;
     text-align: right;
+    padding: 12px;
   }
   
   .loading-overlay {
@@ -167,6 +169,7 @@
     border-top: 1px solid #e4e7ed;
     background: #f5f7fa;
     border-radius: 0 0 12px 12px;
+    flex-shrink: 0;
   }
   
   .char-count {
