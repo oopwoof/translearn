@@ -104,12 +104,32 @@ function parseJsonResponse(jsonData, originalText) {
     suggestions = [jsonData.translate_advice]
   }
 
+  // 动态分析字段（只有在有相应输入的情况下才存在）
+  let intentAnalysis = null
+  let referenceAnalysis = null
+  let directInstructionAnalysis = null
+
+  if (jsonData.intent_audience_analysis) {
+    intentAnalysis = jsonData.intent_audience_analysis
+  }
+
+  if (jsonData.reference_translation_analysis) {
+    referenceAnalysis = jsonData.reference_translation_analysis
+  }
+
+  if (jsonData.direct_instruction_analysis) {
+    directInstructionAnalysis = jsonData.direct_instruction_analysis
+  }
+
   return {
     translatedText: translatedText || originalText,
     analysis: {
       textFeatures,
       terminology,
       suggestions,
+      intentAnalysis,
+      referenceAnalysis,
+      directInstructionAnalysis,
       analyzedAt: new Date().toISOString()
     }
   }
@@ -202,44 +222,69 @@ function parseTextResponse(response, originalText) {
   }
 }
 
-// 翻译接口
-router.post('/claude', async (req, res) => {
-  try {
-    const { text, mode, requirements } = req.body
-
-    if (!text || !text.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: '文本不能为空'
-      })
-    }
-
-    console.log('开始翻译:', { text: text.substring(0, 50) + '...', mode })
-
-    // 构建提示词
-    const prompt = buildPrompt(text, mode, requirements)
-    
-    // 调用Claude API
-    const claudeResponse = await callClaudeAPI(prompt)
-    
-    console.log('Claude响应:', claudeResponse.substring(0, 200) + '...')
-    
-    // 解析响应
-    const result = parseClaudeResponse(claudeResponse, text, mode)
-    
-    res.json({
-      success: true,
-      data: result
-    })
-
-  } catch (error) {
-    console.error('Translation error:', error)
-    res.status(500).json({
-      success: false,
-      message: error.message || '翻译服务暂时不可用'
-    })
+// 检查翻译要求是否为空
+function hasTranslationRequirements(requirements) {
+  return {
+    hasIntent: requirements.intent && requirements.intent.trim() !== '',
+    hasReference: requirements.reference && requirements.reference.trim() !== '',
+    hasDirectRequest: requirements.directRequest && requirements.directRequest.trim() !== ''
   }
-})
+}
+
+// 构建翻译指导部分
+function buildTranslationGuidance(requirements, hasRequirements) {
+  let guidance = '###翻译指导\n'
+  
+  if (hasRequirements.hasIntent) {
+    guidance += `- 翻译意图/受众：${requirements.intent}\n`
+  }
+  
+  if (hasRequirements.hasReference) {
+    guidance += `- 参考译文风格，请总结并学习以下参考译文的风格：${requirements.reference}\n`
+  }
+  
+  if (hasRequirements.hasDirectRequest) {
+    guidance += `- 直接要求：${requirements.directRequest}\n`
+  }
+  
+  // 如果没有任何要求，添加默认说明
+  if (!hasRequirements.hasIntent && !hasRequirements.hasReference && !hasRequirements.hasDirectRequest) {
+    guidance += '- 无特殊要求，请按照标准翻译规范进行翻译。\n'
+  }
+  
+  return guidance
+}
+
+// 构建标准翻译的输出格式
+function buildStandardOutputFormat(hasRequirements) {
+  let outputFormat = `{"text_characteristics": "分析文本类型（如：商务文本、学术文本等）、语体风格（如：正式语体、礼貌语体等）、文本领域、情感色彩、文本主题、语用功能和语言结构特点",
+"existing_terminology/idioms": ["term/idiom1", "term/idiom2"...]`
+  
+  // 只有在有相应输入的情况下才添加分析字段
+  if (hasRequirements.hasIntent) {
+    outputFormat += `,
+"intent/audience_analysis": ""`
+  }
+  
+  if (hasRequirements.hasReference) {
+    outputFormat += `,
+"reference_translation_analysis": ""`
+  }
+  
+  if (hasRequirements.hasDirectRequest) {
+    outputFormat += `,
+"direct_instruction_analysis": ""`
+  }
+  
+  outputFormat += `,
+"terminology/idioms_translation_strategy": "以上术语/习语的翻译策略",
+"translate_advice": "总结并向翻译者提供人工翻译使用的、具体的翻译策略建议",
+"translate_1st_result": "第一次直译",
+"translate_final_result": "润色后的翻译"
+}`
+  
+  return outputFormat
+}
 
 // 构建提示词
 function buildPrompt(text, mode, requirements) {
@@ -264,6 +309,12 @@ function buildPrompt(text, mode, requirements) {
 
 // 速翻工作流
 function buildFastPrompt(text, sourceLanguage, targetLanguage, requirements) {
+  // 检查翻译要求
+  const hasRequirements = hasTranslationRequirements(requirements)
+  
+  // 构建翻译指导部分
+  const translationGuidance = buildTranslationGuidance(requirements, hasRequirements)
+  
   let prompt = `###角色
 你是专业的${sourceLanguage}-${targetLanguage}翻译专家，极力追求忠实和通顺。
 
@@ -273,11 +324,7 @@ function buildFastPrompt(text, sourceLanguage, targetLanguage, requirements) {
 ###任务
 完成以下翻译任务。如果存在翻译意图/受众、参考译文风格和特殊要求，请严格参考，按照格式给出思考过程和翻译结果。
 
-###翻译指导
-- 翻译意图/受众：${requirements.intent || '无'}
-- 参考译文风格，请总结并学习以下参考译文的风格：${requirements.reference || '无'}
-- 直接要求：${requirements.directRequest || '无'}
-
+${translationGuidance}
 ###原文
 ${text}
 
@@ -292,6 +339,15 @@ ${text}
 
 // 标准工作流
 function buildStandardPrompt(text, sourceLanguage, targetLanguage, requirements) {
+  // 检查翻译要求
+  const hasRequirements = hasTranslationRequirements(requirements)
+  
+  // 构建翻译指导部分
+  const translationGuidance = buildTranslationGuidance(requirements, hasRequirements)
+  
+  // 构建动态输出格式
+  const outputFormat = buildStandardOutputFormat(hasRequirements)
+  
   let prompt = `###角色
 你是专业的${sourceLanguage}-${targetLanguage}翻译专家，极力追求忠实和通顺。
 
@@ -307,26 +363,13 @@ function buildStandardPrompt(text, sourceLanguage, targetLanguage, requirements)
 3. 第一次翻译根据新闻内容直译，不要遗漏任何信息。
 2. 根据第一次直译的结果重新意译，遵守原意的前提下让内容符合翻译指导的要求，符合${targetLanguage}表达习惯。
 
-###翻译指导
-- 翻译意图/受众：${requirements.intent || '无'}
-- 参考译文风格，请总结并学习以下参考译文的风格：${requirements.reference || '无'}
-- 直接要求：${requirements.directRequest || '无'}
-
+${translationGuidance}
 ###原文
 ${text}
 
 ###输出格式
 请严格按照以下格式提供json回复：
-{"text_characteristics": "分析文本类型（如：商务文本、学术文本等）、语体风格（如：正式语体、礼貌语体等）、文本领域、情感色彩、文本主题、语用功能和语言结构特点",
-"existing_terminology/idioms": ["term/idiom1", "term/idiom2"...],
-"intent/audience_analysis": "",
-"reference_translation_analysis": "",
-"direct_instruction_analysis": "",
-"terminology/idioms_translation_strategy": "以上术语/习语的翻译策略"
-"translate_advice": "总结并向翻译者提供人工翻译使用的、具体的翻译策略建议",
-"translate_1st_result": "第一次直译",
-"translate_final_result": "润色后的翻译"
-}`
+${outputFormat}`
 
   return prompt
 }
@@ -539,6 +582,45 @@ router.get('/test', async (req, res) => {
       success: false,
       message: 'API连接失败',
       error: error.message
+    })
+  }
+})
+
+// 翻译接口
+router.post('/claude', async (req, res) => {
+  try {
+    const { text, mode, requirements } = req.body
+
+    if (!text || !text.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: '文本不能为空'
+      })
+    }
+
+    console.log('开始翻译:', { text: text.substring(0, 50) + '...', mode })
+
+    // 构建提示词
+    const prompt = buildPrompt(text, mode, requirements)
+    
+    // 调用Claude API
+    const claudeResponse = await callClaudeAPI(prompt)
+    
+    console.log('Claude响应:', claudeResponse.substring(0, 200) + '...')
+    
+    // 解析响应
+    const result = parseClaudeResponse(claudeResponse, text, mode)
+    
+    res.json({
+      success: true,
+      data: result
+    })
+
+  } catch (error) {
+    console.error('Translation error:', error)
+    res.status(500).json({
+      success: false,
+      message: error.message || '翻译服务暂时不可用'
     })
   }
 })
