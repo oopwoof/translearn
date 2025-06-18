@@ -1,0 +1,16 @@
+{
+  "name": "translation-app",
+  "version": "1.0.0",
+  "description": "智能翻译系统 - 支持中阿互译",
+  "scripts": {
+    "dev": "node start-dev.js",
+    "backend": "cd backend && npm start",
+    "frontend": "cd frontend && npm run dev",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "test": "node test-translation.js"
+  },
+  "keywords": ["translation", "chinese", "arabic", "claude", "ai"],
+  "author": "Your Name",
+  "license": "MIT"
+} 
+ 

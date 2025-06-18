@@ -109,8 +109,22 @@
     
     try {
       isTranslating.value = true
-      const result = await translationStore.translateText(textToAnalyze.value, quality.value)
-      targetText.value = result
+      
+      // 构建翻译要求
+      const requirements = {
+        quality: quality.value,
+        intent: intent.value,
+        reference: reference.value,
+        directRequest: directRequest.value
+      }
+      
+      const result = await translationStore.translateText(
+        textToAnalyze.value, 
+        mode.value, 
+        requirements
+      )
+      
+      targetText.value = result.translatedText
       ElMessage.success('翻译完成')
     } catch (error) {
       ElMessage.error(error.message || '翻译失败')

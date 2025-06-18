@@ -15,7 +15,11 @@ export const useTranslationStore = defineStore('translation', {
       this.error = null
       
       try {
-        console.log('发送翻译请求:', { text: text.substring(0, 50), mode })
+        console.log('发送翻译请求:', { 
+          text: text.substring(0, 50) + '...', 
+          mode, 
+          quality: requirements?.quality 
+        })
         
         const response = await translationAPI.translateWithClaude(text, mode, requirements)
         

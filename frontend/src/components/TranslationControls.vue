@@ -289,6 +289,7 @@
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid #dcdfe6;
+    background: #f5f7fa;
   }
   
   .quality-option {
@@ -298,8 +299,10 @@
     cursor: pointer;
     background: white;
     border-right: 1px solid #dcdfe6;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
     font-size: 14px;
+    font-weight: 500;
+    position: relative;
   }
   
   .quality-option:last-child {
@@ -307,12 +310,29 @@
   }
   
   .quality-option:hover {
-    background: #f5f7fa;
+    background: #e6f7ff;
+    color: #1890ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
   }
   
   .quality-option.active {
-    background: #1E3050;
+    background: linear-gradient(135deg, #1890ff, #096dd9);
     color: white;
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  .quality-option.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 2px;
+    background: white;
+    border-radius: 1px;
   }
   </style>
   

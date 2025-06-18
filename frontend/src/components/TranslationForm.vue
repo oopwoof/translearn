@@ -194,10 +194,26 @@ const handleTranslate = async () => {
   }
 
   try {
+    // 确定翻译模式
+    let mode = 'zh-ar'; // 默认中译阿
+    if (sourceLanguage.value === 'ar' && targetLanguage.value === 'zh') {
+      mode = 'ar-zh'; // 阿译中
+    } else if (sourceLanguage.value === 'zh' && targetLanguage.value === 'ar') {
+      mode = 'zh-ar'; // 中译阿
+    }
+
+    // 构建翻译要求（使用标准质量）
+    const requirements = {
+      quality: 'standard',
+      intent: '',
+      reference: '',
+      directRequest: ''
+    };
+
     const result = await translationStore.translateText(
       originalText.value,
-      sourceLanguage.value,
-      targetLanguage.value
+      mode,
+      requirements
     );
     
     translatedText.value = result.translatedText;
