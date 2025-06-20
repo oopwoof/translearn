@@ -54,11 +54,23 @@ export const translationAPI = {
     })
   },
 
-  // 分析文本
+  // 分析文本（旧方法）
   analyzeText: async (text, prompts) => {
     return api.post('/translate/analyze', {
       text,
       prompts
+    })
+  },
+
+  // 使用功能球分析文本（新方法）
+  analyzeTextWithBalls: async (analysisRequest) => {
+    return api.post('/translate/analyze-with-balls', {
+      text: analysisRequest.text,
+      selectedBalls: analysisRequest.selectedBalls,
+      intent: analysisRequest.intent,
+      reference: analysisRequest.reference,
+      directRequest: analysisRequest.directRequest,
+      mode: analysisRequest.mode
     })
   },
 

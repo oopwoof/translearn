@@ -40,35 +40,54 @@
       </el-button>
       
       <!-- 文本特征分析 -->
-      <div v-if="analysisData?.textFeatures && selectedBalls.some(ball => ball.prompt.includes('文本特征'))" class="analysis-section">
+      <div v-if="analysisData?.textCharacteristicsForHumanUse && selectedBalls.some(ball => ball.id === 'text-features')" class="analysis-section">
         <div class="feature-card">
-          <p><strong>当前文本特征：</strong>{{ analysisData.textFeatures.type }}，{{ analysisData.textFeatures.style }}</p>
+          <p><strong>文本特征分析：</strong></p>
+          <p class="feature-content">{{ analysisData.textCharacteristicsForHumanUse }}</p>
           <p class="timestamp">分析时间: {{ formatTime(analysisData.analyzedAt) }}</p>
         </div>
       </div>
-  
-      <!-- 专业术语 -->
-      <div v-if="analysisData?.terminology?.length && selectedBalls.some(ball => ball.prompt.includes('专业术语'))" class="analysis-section">
+
+      <!-- 专业术语、成语/习语分析 -->
+      <div v-if="analysisData?.terminologyIdiomsAnalysis && selectedBalls.some(ball => ball.id === 'terminology')" class="analysis-section">
         <div class="terminology-card">
-          <p><strong>检测到专业术语：</strong></p>
-          <ul class="term-list">
-            <li v-for="term in analysisData.terminology" :key="term.original">
-              <span class="term-original">{{ term.original }}</span>
-              <span class="term-translation">({{ term.translation }})</span>
-            </li>
-          </ul>
+          <p><strong>专业术语、成语/习语分析：</strong></p>
+          <div v-for="(analysis, term) in analysisData.terminologyIdiomsAnalysis" :key="term" class="term-analysis">
+            <div class="term-title">{{ term }}</div>
+            <div class="term-content">{{ analysis }}</div>
+          </div>
         </div>
       </div>
-  
+
       <!-- 翻译建议 -->
-      <div v-if="analysisData?.suggestions?.length && selectedBalls.some(ball => ball.prompt.includes('翻译建议'))" class="analysis-section">
+      <div v-if="analysisData?.translationStrategyForHumanUse && selectedBalls.some(ball => ball.id === 'suggestions')" class="analysis-section">
         <div class="suggestions-card">
           <p><strong>翻译建议：</strong></p>
-          <ul class="suggestion-list">
-            <li v-for="suggestion in analysisData.suggestions" :key="suggestion">
-              {{ suggestion }}
-            </li>
-          </ul>
+          <p class="suggestion-content">{{ analysisData.translationStrategyForHumanUse }}</p>
+        </div>
+      </div>
+
+      <!-- 翻译意图/受众分析 -->
+      <div v-if="analysisData?.intentAudienceAnalysisForHumanUse && selectedBalls.some(ball => ball.id === 'intent-analysis')" class="analysis-section">
+        <div class="intent-card">
+          <p><strong>翻译意图/受众分析：</strong></p>
+          <p class="intent-content">{{ analysisData.intentAudienceAnalysisForHumanUse }}</p>
+        </div>
+      </div>
+
+      <!-- 参考译文风格分析 -->
+      <div v-if="analysisData?.referenceAnalysisForHumanUse && selectedBalls.some(ball => ball.id === 'reference-analysis')" class="analysis-section">
+        <div class="reference-card">
+          <p><strong>参考译文风格分析：</strong></p>
+          <p class="reference-content">{{ analysisData.referenceAnalysisForHumanUse }}</p>
+        </div>
+      </div>
+
+      <!-- 直接要求分析 -->
+      <div v-if="analysisData?.directRequestAnalysisForHumanUse && selectedBalls.some(ball => ball.id === 'direct-request-analysis')" class="analysis-section">
+        <div class="instruction-card">
+          <p><strong>直接要求分析：</strong></p>
+          <p class="instruction-content">{{ analysisData.directRequestAnalysisForHumanUse }}</p>
         </div>
       </div>
   
@@ -80,7 +99,7 @@
   </template>
   
   <script setup>
-  import { ref, computed } from 'vue'
+  import { ref, computed, watch } from 'vue'
   import { ElMessage } from 'element-plus'
   import { Close } from '@element-plus/icons-vue'
   
@@ -95,13 +114,19 @@
     }
   })
   
-  const emit = defineEmits(['analyze'])
+  const emit = defineEmits(['analyze', 'balls-changed'])
   
   const selectedBalls = ref([])
   
   const canAnalyze = computed(() => {
     return selectedBalls.value.length > 0 && !props.analyzing
   })
+
+  // 监听selectedBalls变化，通知父组件
+  watch(selectedBalls, (newBalls) => {
+    const ballIds = newBalls.map(ball => ball.id)
+    emit('balls-changed', ballIds)
+  }, { deep: true })
   
   const handleDrop = (e) => {
     try {
@@ -122,6 +147,16 @@
   const removeBall = (ball) => {
     selectedBalls.value = selectedBalls.value.filter(b => b.id !== ball.id)
   }
+
+  // 接收外部移除球的指令
+  const removeBallById = (ballId) => {
+    selectedBalls.value = selectedBalls.value.filter(b => b.id !== ballId)
+  }
+
+  // 暴露方法给父组件
+  defineExpose({
+    removeBallById
+  })
   
   const handleAnalyze = () => {
     if (!canAnalyze.value) return
@@ -219,6 +254,24 @@
     padding: 12px;
     border-left: 3px solid #1E3050;
   }
+
+  .term-analysis {
+    margin-bottom: 12px;
+    padding: 8px;
+    background: #f0f0f0;
+    border-radius: 6px;
+  }
+
+  .term-title {
+    font-weight: 600;
+    color: #1E3050;
+    margin-bottom: 4px;
+  }
+
+  .term-content {
+    color: #333;
+    line-height: 1.5;
+  }
   
   .suggestions-card {
     background: #f0f8ff;
@@ -227,39 +280,41 @@
     border-left: 3px solid #1976D2;
   }
   
+  .intent-card {
+    background: #e8f5e8;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #4caf50;
+  }
+  
+  .reference-card {
+    background: #f3e5f5;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #9c27b0;
+  }
+  
+  .instruction-card {
+    background: #e1f5fe;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #00bcd4;
+  }
+  
+  .feature-content,
+  .suggestion-content,
+  .intent-content,
+  .reference-content,
+  .instruction-content {
+    color: #333;
+    margin: 8px 0 0 0;
+    line-height: 1.5;
+  }
+  
   .timestamp {
     color: #666;
     font-size: 0.9rem;
     margin: 8px 0 0 0;
-  }
-  
-  .term-list {
-    margin: 8px 0 0 0;
-    padding-left: 16px;
-  }
-  
-  .term-list li {
-    margin-bottom: 4px;
-  }
-  
-  .term-original {
-    font-weight: 500;
-    color: #1E3050;
-  }
-  
-  .term-translation {
-    color: #666;
-    margin-left: 4px;
-  }
-  
-  .suggestion-list {
-    margin: 8px 0 0 0;
-    padding-left: 16px;
-  }
-  
-  .suggestion-list li {
-    margin-bottom: 6px;
-    color: #333;
   }
   
   .empty-state {

@@ -5,7 +5,12 @@ export const useTranslationStore = defineStore('translation', {
   state: () => ({
     isTranslating: false,
     currentTranslation: null,
-    error: null
+    error: null,
+    languages: [
+      { code: 'auto', name: '自动检测' },
+      { code: 'zh', name: '中文' },
+      { code: 'ar', name: '阿拉伯语' }
+    ]
   }),
 
   actions: {
@@ -38,13 +43,31 @@ export const useTranslationStore = defineStore('translation', {
       }
     },
 
-    // 分析文本
+    // 分析文本（旧方法，保持兼容性）
     async analyzeText(text, prompts) {
       this.error = null
       console.log('Analyzing text:', text.substring(0, 50) + '...', 'with prompts:', prompts)
       
       try {
         const response = await translationAPI.analyzeText(text, prompts)
+        if (response.success) {
+          return response.data
+        } else {
+          throw new Error(response.message || '分析失败')
+        }
+      } catch (error) {
+        this.error = error.message || '分析失败'
+        throw error
+      }
+    },
+
+    // 使用功能球分析文本（新方法）
+    async analyzeTextWithBalls(analysisRequest) {
+      this.error = null
+      console.log('Analyzing text with balls:', analysisRequest)
+      
+      try {
+        const response = await translationAPI.analyzeTextWithBalls(analysisRequest)
         if (response.success) {
           return response.data
         } else {

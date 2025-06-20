@@ -1,12 +1,21 @@
 <template>
     <div class="translation-workspace">
-      <FunctionArea :mode="mode" />
+      <FunctionArea 
+        :mode="mode" 
+        :intent="intent"
+        :reference="reference"
+        :directRequest="directRequest"
+        :excludedBallIds="excludedBallIds"
+        @ball-removed="handleBallRemoved"
+      />
       <div class="workspace-container">
         <div class="panel-container">
           <AnalysisPanel 
+            ref="analysisPanelRef"
             :analysis-data="analysisData"
             :analyzing="analyzing"
             @analyze="handleAnalyze"
+            @balls-changed="handleBallsChanged"
           />
           <ArabicPanel
             v-model="targetText"
@@ -56,6 +65,8 @@
   const reference = ref('')
   const directRequest = ref('')
   const analyzing = ref(false)
+  const excludedBallIds = ref([])
+  const analysisPanelRef = ref(null)
   
   // 监听模式变化
   watch(mode, (newMode) => {
@@ -68,6 +79,17 @@
   
   const handleModeChange = (newMode) => {
     mode.value = newMode
+  }
+
+  const handleBallsChanged = (ballIds) => {
+    excludedBallIds.value = ballIds
+  }
+
+  const handleBallRemoved = (ballId) => {
+    // 从分析面板中移除对应的球
+    if (analysisPanelRef.value) {
+      analysisPanelRef.value.removeBallById(ballId)
+    }
   }
   
   const handleAnalyze = async (selectedBalls) => {
@@ -83,10 +105,18 @@
     
     analyzing.value = true
     try {
-      // 只使用被拖入的功能球的prompt
-      const prompts = selectedBalls.map(ball => ball.prompt)
-      console.log('Using prompts from selected balls:', prompts)
-      const result = await translationStore.analyzeText(textToAnalyze.value, prompts)
+      // 构建分析请求，包含翻译要求信息
+      const analysisRequest = {
+        text: textToAnalyze.value,
+        selectedBalls: selectedBalls,
+        intent: intent.value,
+        reference: reference.value,
+        directRequest: directRequest.value,
+        mode: mode.value
+      }
+      
+      console.log('发送分析请求:', analysisRequest)
+      const result = await translationStore.analyzeTextWithBalls(analysisRequest)
       analysisData.value = result
       ElMessage.success('分析完成')
     } catch (error) {
