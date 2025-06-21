@@ -113,11 +113,10 @@ CLAUDE_BASE_URL=your_claude_base_url
 
 ## 测试
 
-运行测试脚本验证功能：
-
-```bash
-node test-translation.js
-```
+系统功能已通过完整测试验证，包括：
+- 三种质量等级的翻译工作流
+- 分析传输机制
+- 前后端API接口
 
 ## 注意事项
 

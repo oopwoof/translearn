@@ -11,11 +11,13 @@
       <div class="workspace-container">
         <div class="panel-container">
           <AnalysisPanel 
-            ref="analysisPanelRef"
             :analysis-data="analysisData"
             :analyzing="analyzing"
-            @analyze="handleAnalyze"
+            :current-text="leftText"
+            @analyze="handleAnalyzeWithBalls"
+            @analyze-grouped="handleGroupedAnalyzeWithBalls"
             @balls-changed="handleBallsChanged"
+            ref="analysisPanelRef"
           />
           <ArabicPanel
             v-model="targetText"
@@ -44,7 +46,7 @@
   </template>
   
   <script setup>
-  import { ref, watch } from 'vue'
+  import { ref, watch, computed } from 'vue'
   import { ElMessage } from 'element-plus'
   import ChinesePanel from './ChinesePanel.vue'
   import ArabicPanel from './ArabicPanel.vue'
@@ -68,6 +70,11 @@
   const excludedBallIds = ref([])
   const analysisPanelRef = ref(null)
   
+  // 计算属性：分析面板始终分析textToAnalyze的内容
+  const leftText = computed(() => {
+    return textToAnalyze.value
+  })
+  
   // 监听模式变化
   watch(mode, (newMode) => {
     // 清空文本和分析结果
@@ -75,6 +82,14 @@
     targetText.value = ''
     analysisData.value = null
     quality.value = ''
+    
+    // 清除分析面板状态
+    if (analysisPanelRef.value) {
+      analysisPanelRef.value.clearAllAnalysisState()
+    }
+    
+    // 清除store中的分析结果
+    translationStore.clearAllState()
   })
   
   const handleModeChange = (newMode) => {
@@ -92,14 +107,14 @@
     }
   }
   
-  const handleAnalyze = async (selectedBalls) => {
+  const handleAnalyzeWithBalls = async (selectedBalls, onAnalysisComplete) => {
     if (!textToAnalyze.value) {
       ElMessage.warning('请先输入要分析的文本')
       return
     }
     
     if (!selectedBalls || selectedBalls.length === 0) {
-      ElMessage.warning('请先拖入功能球')
+      ElMessage.warning('没有需要分析的功能球')
       return
     }
     
@@ -109,18 +124,110 @@
       const analysisRequest = {
         text: textToAnalyze.value,
         selectedBalls: selectedBalls,
-        intent: intent.value,
-        reference: reference.value,
-        directRequest: directRequest.value,
+        intent: intent.value || '',
+        reference: reference.value || '',
+        directRequest: directRequest.value || '',
         mode: mode.value
       }
       
-      console.log('发送分析请求:', analysisRequest)
+      console.log('🚀 发送分析请求:', analysisRequest)
       const result = await translationStore.analyzeTextWithBalls(analysisRequest)
-      analysisData.value = result
-      ElMessage.success('分析完成')
+      console.log('📥 收到分析结果:', result)
+      
+      if (!result || !result.success) {
+        throw new Error(result?.message || '分析失败')
+      }
+      
+      // 直接传递完整的后端结果（包含originalData）给AnalysisPanel
+      const newAnalysisData = result
+      newAnalysisData.analyzedAt = new Date().toISOString()
+      
+      // 直接使用完整的结果数据，不要解构，保持originalData结构
+      analysisData.value = newAnalysisData
+      console.log('📋 更新analysisData.value (完整结构):', analysisData.value)
+      
+      // Store已经在内部处理了存储逻辑，这里不需要重复调用
+      console.log('💾 分析结果已在store中处理')
+      
+      // 通知AnalysisPanel分析完成
+      const analyzedBallIds = selectedBalls.map(ball => ball.id).filter(id => id)
+      if (onAnalysisComplete && typeof onAnalysisComplete === 'function') {
+        onAnalysisComplete(analyzedBallIds)
+      }
+      
+      ElMessage.success(`完成 ${selectedBalls.length} 个功能球的分析`)
     } catch (error) {
+      console.error('❌ 分析失败:', error)
       ElMessage.error(error.message || '分析失败')
+    } finally {
+      analyzing.value = false
+    }
+  }
+  
+  // 处理分组分析
+  const handleGroupedAnalyzeWithBalls = async (groupedRequest) => {
+    if (!textToAnalyze.value) {
+      ElMessage.warning('请先输入要分析的文本')
+      return
+    }
+    
+    const { balls, groupSize, onProgress, onComplete } = groupedRequest
+    
+    if (!balls || balls.length === 0) {
+      ElMessage.warning('没有需要分析的功能球')
+      return
+    }
+    
+    if (!groupSize || groupSize < 1) {
+      ElMessage.warning('分组大小设置错误')
+      return
+    }
+    
+    analyzing.value = true
+    try {
+      // 构建分析请求
+      const analysisRequest = {
+        text: textToAnalyze.value,
+        selectedBalls: balls,
+        intent: intent.value || '',
+        reference: reference.value || '',
+        directRequest: directRequest.value || '',
+        mode: mode.value
+      }
+      
+      console.log('🚀 发送分组分析请求:', analysisRequest, { groupSize })
+      
+      // 使用流式分组分析API
+      const result = await translationStore.analyzeTextWithBallsStreaming(
+        analysisRequest,
+        groupSize,
+        onProgress
+      )
+      
+      if (result && result.success && result.data) {
+        // 直接传递完整的后端结果给AnalysisPanel
+        const newAnalysisData = result
+        newAnalysisData.analyzedAt = new Date().toISOString()
+        
+        // 直接使用完整的结果数据，保持originalData结构
+        analysisData.value = newAnalysisData
+        
+        // Store已经在内部处理了存储逻辑，这里不需要重复调用
+        console.log('💾 分组分析结果已在store中处理')
+        
+        // 通知AnalysisPanel分析完成
+        const analyzedBallIds = balls.map(ball => ball.id).filter(id => id)
+        if (onComplete && typeof onComplete === 'function') {
+          onComplete(analyzedBallIds)
+        }
+        
+        ElMessage.success(`完成 ${balls.length} 个功能球的分组分析`)
+      } else {
+        throw new Error(result?.message || '分组分析未返回有效结果')
+      }
+    } catch (error) {
+      console.error('❌ 分组分析失败:', error)
+      ElMessage.error(error.message || '分组分析失败')
     } finally {
       analyzing.value = false
     }
@@ -146,6 +253,14 @@
         intent: intent.value,
         reference: reference.value,
         directRequest: directRequest.value
+      }
+      
+      // 检查是否有可用的分析结果
+      const availableAnalysis = translationStore.getAnalysisForTranslation(textToAnalyze.value)
+      if (availableAnalysis) {
+        console.log('检测到可用分析结果，将传递给翻译:', availableAnalysis)
+      } else {
+        console.log('无可用分析结果，执行完整翻译流程')
       }
       
       const result = await translationStore.translateText(

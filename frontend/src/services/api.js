@@ -46,11 +46,12 @@ api.interceptors.response.use(
 // 翻译API
 export const translationAPI = {
   // Claude翻译
-  translateWithClaude: async (text, mode, requirements) => {
+  translateWithClaude: async (text, mode, requirements, analysisForTranslation = null) => {
     return api.post('/translate/claude', {
       text,
       mode,
-      requirements
+      requirements,
+      analysisForTranslation
     })
   },
 
@@ -72,6 +73,100 @@ export const translationAPI = {
       directRequest: analysisRequest.directRequest,
       mode: analysisRequest.mode
     })
+  },
+
+  // 使用功能球分组分析文本（并行处理）
+  analyzeTextWithBallsGrouped: async (analysisRequest, groupSize = 2) => {
+    return api.post('/translate/analyze-with-balls-grouped', {
+      text: analysisRequest.text,
+      selectedBalls: analysisRequest.selectedBalls,
+      intent: analysisRequest.intent,
+      reference: analysisRequest.reference,
+      directRequest: analysisRequest.directRequest,
+      mode: analysisRequest.mode,
+      groupSize
+    })
+  },
+
+  // 使用功能球流式分组分析文本（分步返回）
+  analyzeTextWithBallsStreaming: async (analysisRequest, groupSize = 2, onProgress = null) => {
+    const response = await fetch('/api/translate/analyze-with-balls-streaming', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: analysisRequest.text,
+        selectedBalls: analysisRequest.selectedBalls,
+        intent: analysisRequest.intent,
+        reference: analysisRequest.reference,
+        directRequest: analysisRequest.directRequest,
+        mode: analysisRequest.mode,
+        groupSize
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    // 如果不是流式响应，直接返回JSON
+    const contentType = response.headers.get('content-type')
+    if (!contentType || !contentType.includes('text/event-stream')) {
+      return await response.json()
+    }
+
+    // 处理流式响应
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+    let finalResult = null
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        
+        // 保留最后一行（可能不完整）
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6))
+              
+              if (onProgress) {
+                onProgress(data)
+              }
+
+              // 保存最终结果
+              if (data.type === 'complete') {
+                finalResult = {
+                  success: true,
+                  data: data.mergedResult,
+                  originalData: data.originalMergedResult, // 保留原始格式
+                  isGrouped: true,
+                  totalGroups: data.totalGroups,
+                  completedGroups: data.completedGroups,
+                  failedGroups: data.failedGroups,
+                  allResults: data.allResults
+                }
+              }
+            } catch (e) {
+              console.error('解析SSE数据失败:', e)
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock()
+    }
+
+    return finalResult
   },
 
   // 测试API连接

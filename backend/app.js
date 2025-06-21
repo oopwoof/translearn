@@ -29,8 +29,37 @@ function logToFile(level, message, data = null) {
   
   // 同时输出到控制台
   const consoleMessage = `[${timestamp}] ${level.toUpperCase()}: ${message}`
+  
   if (data) {
-    console.log(consoleMessage, data)
+    // 检查是否包含时间信息，如果有则突出显示
+    if (data.duration || data.groupDuration || data.step1Duration || data.step2Duration || data.totalDuration) {
+      let timeInfo = ''
+      if (data.duration) timeInfo += ` ⏱️ 耗时: ${data.duration}`
+      if (data.groupDuration) timeInfo += ` ⏱️ 组耗时: ${data.groupDuration}`
+      if (data.step1Duration) timeInfo += ` ⏱️ 步骤1: ${data.step1Duration}`
+      if (data.step2Duration) timeInfo += ` ⏱️ 步骤2: ${data.step2Duration}`
+      if (data.totalDuration) timeInfo += ` ⏱️ 总耗时: ${data.totalDuration}`
+      
+      console.log(consoleMessage + timeInfo)
+      
+      // 如果有其他重要信息，也显示出来
+      const otherData = { ...data }
+      delete otherData.duration
+      delete otherData.groupDuration
+      delete otherData.step1Duration
+      delete otherData.step2Duration
+      delete otherData.totalDuration
+      delete otherData.startTime
+      delete otherData.endTime
+      delete otherData.groupStartTime
+      delete otherData.groupEndTime
+      
+      if (Object.keys(otherData).length > 0) {
+        console.log('  📊 其他信息:', otherData)
+      }
+    } else {
+      console.log(consoleMessage, data)
+    }
   } else {
     console.log(consoleMessage)
   }

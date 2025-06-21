@@ -129,19 +129,26 @@ watch(() => [props.intent, props.reference, props.directRequest], (newValues, ol
   const [newIntent, newReference, newDirectRequest] = newValues
   const [oldIntent, oldReference, oldDirectRequest] = oldValues
 
-  // 检查意图/受众输入框是否被清空
-  if (oldIntent && oldIntent.trim() && (!newIntent || !newIntent.trim())) {
-    emit('ball-removed', 'intent-analysis')
-  }
+  try {
+    // 检查意图/受众输入框是否被清空
+    if (oldIntent && oldIntent.trim() && (!newIntent || !newIntent.trim())) {
+      emit('ball-removed', 'intent-analysis')
+      console.log('🗑️ 移除意图/受众分析功能球')
+    }
 
-  // 检查参考译文输入框是否被清空
-  if (oldReference && oldReference.trim() && (!newReference || !newReference.trim())) {
-    emit('ball-removed', 'reference-analysis')
-  }
+    // 检查参考译文输入框是否被清空
+    if (oldReference && oldReference.trim() && (!newReference || !newReference.trim())) {
+      emit('ball-removed', 'reference-analysis')
+      console.log('🗑️ 移除参考译文风格分析功能球')
+    }
 
-  // 检查直接要求输入框是否被清空
-  if (oldDirectRequest && oldDirectRequest.trim() && (!newDirectRequest || !newDirectRequest.trim())) {
-    emit('ball-removed', 'direct-request-analysis')
+    // 检查直接要求输入框是否被清空
+    if (oldDirectRequest && oldDirectRequest.trim() && (!newDirectRequest || !newDirectRequest.trim())) {
+      emit('ball-removed', 'direct-request-analysis')
+      console.log('🗑️ 移除直接要求分析功能球')
+    }
+  } catch (error) {
+    console.error('❌ 处理功能球移除失败:', error)
   }
 }, { deep: true })
 </script>

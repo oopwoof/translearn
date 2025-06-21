@@ -1,0 +1,3 @@
+{"timestamp":"2025-06-21T14:02:02.202Z","level":"info","message":"🚀 服务器运行在 http://localhost:3000","data":null}
+{"timestamp":"2025-06-21T14:02:02.204Z","level":"info","message":"📝 API文档: http://localhost:3000/api/health","data":null}
+{"timestamp":"2025-06-21T14:02:02.204Z","level":"info","message":"📋 日志查看: http://localhost:3000/api/logs","data":null}
