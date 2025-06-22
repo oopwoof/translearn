@@ -3,7 +3,9 @@
     class="function-ball"
     :class="{ 
       'is-dragging': isDragging,
-      'is-disabled': disabled
+      'is-disabled': disabled,
+      'is-selected': selected,
+      'is-confirmed': confirmed
     }"
     :draggable="!disabled"
     @dragstart="handleDragStart"
@@ -15,6 +17,17 @@
       <el-icon class="ball-icon"><component :is="icon" /></el-icon>
       <span class="ball-label">{{ label }}</span>
     </div>
+    
+    <!-- 选中状态指示器 -->
+    <div v-if="selected && !confirmed" class="selected-indicator">
+      <el-icon class="check-icon"><Check /></el-icon>
+    </div>
+    
+    <!-- 确认状态指示器 -->
+    <div v-if="confirmed" class="confirmed-indicator">
+      <el-icon class="star-icon"><Star /></el-icon>
+    </div>
+    
     <div v-if="disabled" class="disabled-overlay">
       <el-icon class="lock-icon"><Lock /></el-icon>
     </div>
@@ -22,9 +35,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, inject, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Lock } from '@element-plus/icons-vue'
+import { Lock, Check, Star } from '@element-plus/icons-vue'
 
 const props = defineProps({
   id: {
@@ -50,11 +63,23 @@ const props = defineProps({
   disabledReason: {
     type: String,
     default: ''
+  },
+  selected: {
+    type: Boolean,
+    default: false
+  },
+  confirmed: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['dragstart', 'dragend'])
+const emit = defineEmits(['dragstart', 'dragend', 'click'])
 const isDragging = ref(false)
+
+// 注入父组件提供的方法
+const getMultiDragData = inject('getMultiDragData', () => null)
+const clearMultiDragData = inject('clearMultiDragData', () => {})
 
 const handleDragStart = (e) => {
   if (props.disabled) {
@@ -64,34 +89,62 @@ const handleDragStart = (e) => {
   }
   
   isDragging.value = true
-  e.dataTransfer.setData('text/plain', JSON.stringify({
+  
+  // 先触发父组件的 dragstart 事件，这样会设置多选拖拽数据
+  emit('dragstart', props)
+  
+  // 等待一个微任务，确保父组件已经处理完 dragstart 事件
+  nextTick(() => {
+    // 检查是否有多选拖拽数据
+    const multiDragData = getMultiDragData()
+    
+    if (multiDragData && multiDragData.isMultiDrag) {
+      // 多选拖拽：设置多选数据
+      console.log('🎯 设置多选拖拽数据:', multiDragData)
+      e.dataTransfer.setData('text/plain', JSON.stringify(multiDragData))
+    } else {
+      // 单个拖拽：设置单个功能球数据
+      const dragData = {
     id: props.id,
     label: props.label,
     prompt: props.prompt,
-    icon: props.icon
-  }))
-  emit('dragstart', props)
+        icon: props.icon,
+        selected: props.selected,
+        isMultiDrag: false
+      }
+      
+      e.dataTransfer.setData('text/plain', JSON.stringify(dragData))
+    }
+  })
 }
 
 const handleDragEnd = () => {
   isDragging.value = false
+  clearMultiDragData() // 清理多选拖拽数据
   emit('dragend')
 }
 
-const handleClick = () => {
+const handleClick = (e) => {
   if (props.disabled) {
     ElMessage.warning(props.disabledReason)
+    return
   }
+  
+  // 阻止事件冒泡
+  e.stopPropagation()
+  
+  // 发送点击事件给父组件
+  emit('click', props)
 }
 </script>
 
 <style scoped>
 .function-ball {
-  width: 100px;
-  height: 100px;
-  border-radius: 12px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: move;
   transition: all 0.3s;
   display: flex;
@@ -101,11 +154,13 @@ const handleClick = () => {
   touch-action: none;
   position: relative;
   z-index: 1;
+  border: 2px solid transparent;
+  flex-shrink: 0;
 }
 
 .function-ball:hover:not(.is-disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .function-ball.is-dragging {
@@ -122,20 +177,49 @@ const handleClick = () => {
 
 .function-ball.is-disabled:hover {
   transform: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.function-ball.is-selected {
+  border-color: #409EFF;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+}
+
+.function-ball.is-selected:hover {
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
+}
+
+.function-ball.is-confirmed {
+  border-color: #FFD700;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+  background: linear-gradient(135deg, #FFF8DC 0%, white 100%);
+}
+
+.function-ball.is-confirmed:hover {
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+.function-ball.is-confirmed .ball-icon {
+  color: #B8860B;
+}
+
+.function-ball.is-confirmed .ball-label {
+  color: #B8860B;
+  font-weight: 600;
 }
 
 .ball-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
   pointer-events: none;
   z-index: 1;
 }
 
 .ball-icon {
-  font-size: 28px;
+  font-size: 20px;
   color: #1E3050;
   transition: color 0.3s;
 }
@@ -144,28 +228,78 @@ const handleClick = () => {
   color: #c0c4cc;
 }
 
+.function-ball.is-selected .ball-icon {
+  color: #409EFF;
+}
+
 .ball-label {
-  font-size: 13px;
+  font-size: 9px;
   color: #1E3050;
   text-align: center;
   font-weight: 500;
-  max-width: 90px;
+  max-width: 50px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   transition: color 0.3s;
+  line-height: 1.1;
 }
 
 .function-ball.is-disabled .ball-label {
   color: #c0c4cc;
 }
 
+.function-ball.is-selected .ball-label {
+  color: #409EFF;
+  font-weight: 600;
+}
+
+.selected-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  background: #409EFF;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.check-icon {
+  font-size: 8px;
+  color: white;
+}
+
+.confirmed-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  background: #FFD700;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+}
+
+.star-icon {
+  font-size: 8px;
+  color: white;
+}
+
 .disabled-overlay {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 20px;
-  height: 20px;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   display: flex;
@@ -175,7 +309,7 @@ const handleClick = () => {
 }
 
 .lock-icon {
-  font-size: 12px;
+  font-size: 8px;
   color: #909399;
 }
 </style> 

@@ -409,29 +409,77 @@
   
   const handleDrop = (e) => {
     try {
-      const ballData = JSON.parse(e.dataTransfer.getData('text/plain'))
-      if (!selectedBalls.value.find(b => b.id === ballData.id)) {
-        selectedBalls.value.push({
-          id: ballData.id,
-          label: ballData.label,
-          icon: ballData.icon,
-          prompt: ballData.prompt
+      const dragDataStr = e.dataTransfer.getData('text/plain')
+      let dragData
+      
+      try {
+        dragData = JSON.parse(dragDataStr)
+      } catch (parseError) {
+        console.error('拖拽数据解析失败:', parseError)
+        ElMessage.error('拖拽数据格式错误')
+        return
+      }
+      
+      // 检查是否是多选拖拽
+      if (dragData.isMultiDrag && Array.isArray(dragData.balls)) {
+        console.log('🎯 处理多选拖拽:', dragData)
+        
+        let addedCount = 0
+        let restoredCount = 0
+        
+        dragData.balls.forEach(ballData => {
+          // 检查是否已经存在
+          if (!selectedBalls.value.find(b => b.id === ballData.id)) {
+            selectedBalls.value.push({
+              id: ballData.id,
+              label: ballData.label,
+              icon: ballData.icon,
+              prompt: ballData.prompt
+            })
+            addedCount++
+            
+            // 检查是否有历史分析数据
+            if (persistedAnalysisData.value[ballData.id]) {
+              const historicalData = persistedAnalysisData.value[ballData.id]
+              Object.assign(displayedAnalysisData.value, historicalData)
+              analyzedBalls.value.add(ballData.id)
+              restoredCount++
+            }
+          }
         })
         
-        // 检查是否有该功能球的历史分析数据
-        if (persistedAnalysisData.value[ballData.id]) {
-          // 恢复显示历史分析数据
-          const historicalData = persistedAnalysisData.value[ballData.id]
-          Object.assign(displayedAnalysisData.value, historicalData)
+        if (addedCount > 0) {
+          ElMessage.success(`成功添加 ${addedCount} 个功能球` + (restoredCount > 0 ? `，恢复了 ${restoredCount} 个历史分析结果` : ''))
+        }
+      } else {
+        // 单个功能球拖拽（原逻辑）
+        const ballData = dragData
+        if (!selectedBalls.value.find(b => b.id === ballData.id)) {
+          selectedBalls.value.push({
+            id: ballData.id,
+            label: ballData.label,
+            icon: ballData.icon,
+            prompt: ballData.prompt
+          })
           
-          // 标记为已分析
-          analyzedBalls.value.add(ballData.id)
-          
-          ElMessage.success(`恢复了 ${ballData.label} 的历史分析结果`)
+          // 检查是否有该功能球的历史分析数据
+          if (persistedAnalysisData.value[ballData.id]) {
+            // 恢复显示历史分析数据
+            const historicalData = persistedAnalysisData.value[ballData.id]
+            Object.assign(displayedAnalysisData.value, historicalData)
+            
+            // 标记为已分析
+            analyzedBalls.value.add(ballData.id)
+            
+            ElMessage.success(`恢复了 ${ballData.label} 的历史分析结果`)
+          } else {
+            ElMessage.success(`添加了功能球: ${ballData.label}`)
+          }
         }
       }
     } catch (error) {
       console.error('Drop error:', error)
+      ElMessage.error('拖拽处理失败')
     }
   }
   
@@ -631,94 +679,193 @@
   
   <style scoped>
   .analysis-panel {
-    background: white;
-    border-radius: 12px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-backdrop);
+    -webkit-backdrop-filter: var(--glass-backdrop);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
     padding: 20px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-    height: fit-content;
-    max-height: calc(100vh - 140px);
+    box-shadow: var(--shadow-soft);
     overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100%;
+    transition: var(--transition-smooth);
+    position: relative;
+  }
+  
+  .analysis-panel:hover {
+    box-shadow: var(--shadow-medium);
+    border-color: rgba(255, 255, 255, 0.4);
   }
   
   .analysis-panel h3 {
-    margin: 0 0 20px 0;
-    color: #1E3050;
-    font-size: 18px;
+    color: var(--deep-blue, #2c3e50) !important;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    position: relative;
+  }
+  
+  .analysis-panel h3::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--bg-gradient-warm);
+    border-radius: 2px;
   }
   
   .ball-drop-zone {
-    background: #f5f7fa;
-    border: 2px dashed #dcdfe6;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-    min-height: 100px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+    border: 2px dashed rgba(52, 152, 219, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 20px;
+    min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  
+  .ball-drop-zone::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 20%, rgba(52, 152, 219, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255, 181, 167, 0.05) 0%, transparent 50%);
+    pointer-events: none;
   }
   
   .ball-drop-zone.has-balls {
     border-style: solid;
-    border-color: #1E3050;
-    background: #f0f8ff;
+    border-color: var(--soft-blue);
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(255, 255, 255, 0.2));
+    box-shadow: var(--shadow-soft);
   }
   
   .drop-hint {
-    color: #909399;
-    font-size: 14px;
+    color: var(--deep-blue, #2c3e50) !important;
+    font-size: 15px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  }
+  
+  .drop-hint::before {
+    content: '🎯';
+    font-size: 20px;
   }
   
   .selected-balls {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
   }
   
   .selected-ball {
-    background: white;
-    border-radius: 8px;
-    padding: 8px 12px;
+    background: var(--bg-gradient-card);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
+    padding: 12px 16px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 13px;
-    color: #1E3050;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    color: var(--deep-blue, #2c3e50) !important;
+    box-shadow: var(--shadow-soft);
     position: relative;
-    transition: all 0.3s;
+    transition: var(--transition-smooth);
+    font-weight: 600;
   }
-
+  
+  .selected-ball span {
+    color: var(--deep-blue, #2c3e50) !important;
+  }
+  
+  .selected-ball:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-medium);
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  
   .selected-ball.analyzed {
-    background: #f0f9ff;
-    border: 1px solid #3b82f6;
+    background: linear-gradient(135deg, rgba(46, 125, 50, 0.1), rgba(255, 255, 255, 0.3));
+    border-color: rgba(46, 125, 50, 0.3);
+    animation: success-glow 2s infinite alternate;
   }
-
+  
   .selected-ball.pending {
-    background: #fffbeb;
-    border: 1px solid #f59e0b;
+    background: linear-gradient(135deg, rgba(254, 215, 170, 0.2), rgba(255, 255, 255, 0.3));
+    border-color: rgba(254, 215, 170, 0.5);
+    animation: pending-pulse 1.5s infinite;
   }
-
+  
+  @keyframes success-glow {
+    from {
+      box-shadow: var(--shadow-soft), 0 0 0 0 rgba(46, 125, 50, 0.3);
+    }
+    to {
+      box-shadow: var(--shadow-medium), 0 0 0 4px rgba(46, 125, 50, 0.1);
+    }
+  }
+  
+  @keyframes pending-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.02);
+      opacity: 0.9;
+    }
+  }
+  
   .ball-status {
     display: flex;
     align-items: center;
     margin-left: 4px;
   }
-
+  
   .status-icon {
-    font-size: 14px;
+    font-size: 16px;
   }
-
+  
   .analyzed-icon {
-    color: #10b981;
+    color: #2E7D32 !important;
+    animation: check-bounce 0.6s ease-out;
   }
-
+  
   .pending-icon {
-    color: #f59e0b;
-    animation: spin 1s linear infinite;
+    color: #F57C00 !important;
+    animation: spin 2s linear infinite;
   }
-
+  
+  @keyframes check-bounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+  
   @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
@@ -726,7 +873,7 @@
   
   .analyze-btn {
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
   
   .analyze-btn.is-loading {
@@ -734,67 +881,170 @@
   }
   
   .analysis-section {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    animation: slideUpFade 0.6s ease-out;
   }
   
   .feature-card {
-    background: #f9f9f9;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #2E7D32;
+    background: linear-gradient(135deg, rgba(46, 125, 50, 0.08), rgba(255, 255, 255, 0.3));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(46, 125, 50, 0.2);
+    padding: 18px;
+    border-left: 4px solid #2E7D32;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    border-left-color: #4CAF50;
+  }
+  
+  .feature-card p, .feature-card strong {
+    color: var(--deep-blue, #2c3e50) !important;
   }
   
   .terminology-card {
-    background: #f9f9f9;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #1E3050;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.08), rgba(255, 255, 255, 0.3));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    padding: 18px;
+    border-left: 4px solid var(--soft-blue);
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
   }
-
+  
+  .terminology-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    border-left-color: #66B1FF;
+  }
+  
+  .terminology-card p, .terminology-card strong {
+    color: var(--deep-blue, #2c3e50) !important;
+  }
+  
   .term-analysis {
-    margin-bottom: 12px;
-    padding: 8px;
-    background: #f0f0f0;
-    border-radius: 6px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(255, 255, 255, 0.4));
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(52, 152, 219, 0.1);
+    transition: var(--transition-smooth);
   }
-
+  
+  .term-analysis:hover {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.08), rgba(255, 255, 255, 0.5));
+    border-color: rgba(52, 152, 219, 0.2);
+  }
+  
   .term-title {
-    font-weight: 600;
-    color: #1E3050;
-    margin-bottom: 4px;
+    font-weight: 700;
+    color: var(--deep-blue, #2c3e50) !important;
+    margin-bottom: 6px;
+    font-size: 14px;
   }
-
+  
   .term-content {
-    color: #333;
-    line-height: 1.5;
+    color: var(--deep-blue, #2c3e50) !important;
+    line-height: 1.6;
+    font-size: 13px;
+    opacity: 0.9;
   }
   
   .suggestions-card {
-    background: #f0f8ff;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #1976D2;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.08), rgba(255, 255, 255, 0.3));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    padding: 18px;
+    border-left: 4px solid #1976D2;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+  }
+  
+  .suggestions-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .suggestions-card p, .suggestions-card strong {
+    color: var(--deep-blue, #2c3e50) !important;
   }
   
   .intent-card {
-    background: #e8f5e8;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #4caf50;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.08), rgba(255, 255, 255, 0.3));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    padding: 18px;
+    border-left: 4px solid #4CAF50;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+  }
+  
+  .intent-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .intent-card p, .intent-card strong {
+    color: var(--deep-blue, #2c3e50) !important;
   }
   
   .reference-card {
-    background: #f3e5f5;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #9c27b0;
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.08), rgba(255, 255, 255, 0.3));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(156, 39, 176, 0.2);
+    padding: 18px;
+    border-left: 4px solid #9C27B0;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+  }
+  
+  .reference-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .reference-card p, .reference-card strong {
+    color: var(--deep-blue, #2c3e50) !important;
   }
   
   .instruction-card {
-    background: #e1f5fe;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #00bcd4;
+    background: linear-gradient(135deg, rgba(0, 188, 212, 0.08), rgba(255, 255, 255, 0.3));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(0, 188, 212, 0.2);
+    padding: 18px;
+    border-left: 4px solid #00BCD4;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+  }
+  
+  .instruction-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .instruction-card p, .instruction-card strong {
+    color: var(--deep-blue, #2c3e50) !important;
   }
   
   .feature-content,
@@ -802,88 +1052,203 @@
   .intent-content,
   .reference-content,
   .instruction-content {
-    color: #333;
-    margin: 8px 0 0 0;
-    line-height: 1.5;
+    color: var(--deep-blue, #2c3e50) !important;
+    margin: 12px 0 0 0;
+    line-height: 1.6;
+    font-size: 14px;
+    opacity: 0.9;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    font-weight: 500;
   }
   
   .timestamp {
-    color: #666;
-    font-size: 0.9rem;
-    margin: 8px 0 0 0;
+    color: rgba(44, 62, 80, 0.6) !important;
+    font-size: 12px;
+    margin: 12px 0 0 0;
+    font-style: italic;
   }
   
   .empty-state {
     text-align: center;
-    color: #999;
-    padding: 40px 20px;
+    color: var(--deep-blue, #2c3e50) !important;
+    padding: 60px 20px;
+    font-size: 15px;
+    position: relative;
+  }
+  
+  .empty-state::before {
+    content: '📋';
+    display: block;
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
   }
   
   .remove-ball {
-    font-size: 14px;
-    color: #909399;
+    font-size: 16px;
+    color: rgba(44, 62, 80, 0.5) !important;
     cursor: pointer;
-    margin-left: 4px;
-    transition: all 0.3s;
+    margin-left: 6px;
+    transition: var(--transition-smooth);
+    border-radius: var(--radius-round);
+    padding: 2px;
   }
   
   .remove-ball:hover {
-    color: #F56C6C;
-    transform: scale(1.1);
+    color: #F56C6C !important;
+    transform: scale(1.2);
+    background: rgba(245, 108, 108, 0.1);
   }
-
+  
   .group-settings {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border);
   }
-
+  
   .group-switch {
-    margin-right: 10px;
+    margin-right: 12px;
   }
-
+  
   .group-size-selector {
-    margin-top: 10px;
+    margin-top: 12px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
-
+  
   .group-size-label {
     font-size: 14px;
-    color: #606266;
-    font-weight: 500;
+    color: var(--deep-blue, #2c3e50) !important;
+    font-weight: 600;
   }
-
+  
   .analysis-progress {
-    margin-bottom: 20px;
-    padding: 15px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(46, 125, 50, 0.05), rgba(255, 255, 255, 0.3));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(46, 125, 50, 0.2);
+    box-shadow: var(--shadow-soft);
+    animation: progress-glow 3s infinite alternate;
   }
-
+  
+  @keyframes progress-glow {
+    from {
+      box-shadow: var(--shadow-soft);
+    }
+    to {
+      box-shadow: var(--shadow-medium), 0 0 0 2px rgba(46, 125, 50, 0.1);
+    }
+  }
+  
   .progress-info {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     font-size: 14px;
-    color: #64748b;
-    font-weight: 500;
+    color: var(--deep-blue, #2c3e50) !important;
+    font-weight: 600;
   }
-
+  
   .progress-bar {
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
-
+  
   .current-group {
-    margin-top: 10px;
+    margin-top: 12px;
   }
-
+  
   .current-group-label {
-    font-weight: 600;
-    margin-right: 10px;
+    font-weight: 700;
+    margin-right: 12px;
+    color: var(--deep-blue, #2c3e50) !important;
   }
-
+  
   .current-ball-tag {
-    margin-left: 5px;
+    margin-left: 6px;
+  }
+  
+  /* 玻璃卡片装饰元素 */
+  .feature-card::before,
+  .terminology-card::before,
+  .suggestions-card::before,
+  .intent-card::before,
+  .reference-card::before,
+  .instruction-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    background: 
+      radial-gradient(circle at 50% 50%, transparent 30%, currentColor 31%, currentColor 32%, transparent 33%);
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+    .analysis-panel {
+      padding: 16px;
+      border-radius: var(--radius-md);
+    }
+    
+    .analysis-panel h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+    
+    .ball-drop-zone {
+      padding: 16px;
+      min-height: 100px;
+    }
+    
+    .selected-balls {
+      gap: 8px;
+    }
+    
+    .selected-ball {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+    
+    .feature-card,
+    .terminology-card,
+    .suggestions-card,
+    .intent-card,
+    .reference-card,
+    .instruction-card {
+      padding: 14px;
+    }
+  }
+  
+  /* 自定义滚动条 */
+  .analysis-panel::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .analysis-panel::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+  
+  .analysis-panel::-webkit-scrollbar-thumb {
+    background: var(--soft-blue, #3498db);
+    border-radius: 3px;
+    transition: var(--transition-smooth);
+  }
+  
+  .analysis-panel::-webkit-scrollbar-thumb:hover {
+    background: var(--deep-blue, #2c3e50);
   }
   </style>
 
