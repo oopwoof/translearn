@@ -1,10 +1,13 @@
 <template>
     <div class="translation-controls">
+      <!-- 输入字段区域 -->
       <div class="control-group">
         <label class="control-label">意图/受众</label>
         <el-input
           v-model="localIntent"
           @update:model-value="updateIntent"
+          type="textarea"
+          :rows="3"
           placeholder="如：商务伙伴、学术交流..."
           class="control-input"
         />
@@ -27,102 +30,53 @@
         <el-input
           v-model="localDirectRequest"
           @update:model-value="updateDirectRequest"
+          type="textarea"
+          :rows="3"
           placeholder="如：保留礼貌用语、使用正式语体..."
           class="control-input"
         />
       </div>
-  
-      <!-- 模式选择按钮组 -->
-      <div class="mode-buttons">
-        <div 
-          class="mode-button"
-          :class="{ 
-            active: mode === 'zh-ar',
-            expanded: expandedMode === 'zh-ar'
-          }"
-          @click="handleModeClick('zh-ar')"
-        >
-          <span class="mode-label">中-阿</span>
-          <div v-if="expandedMode === 'zh-ar'" class="expanded-controls">
-            <div class="quality-selector">
-              <div 
-                class="quality-option"
-                :class="{ active: quality === 'fast' }"
-                @click.stop="updateQuality('fast')"
-              >
-                速翻
-              </div>
-              <div 
-                class="quality-option"
-                :class="{ active: quality === 'standard' }"
-                @click.stop="updateQuality('standard')"
-              >
-                标准
-              </div>
-              <div 
-                class="quality-option"
-                :class="{ active: quality === 'premium' }"
-                @click.stop="updateQuality('premium')"
-              >
-                精修
-              </div>
-            </div>
-            <el-button 
-              type="primary" 
-              size="small"
-              @click.stop="handleTranslate"
-              :disabled="!quality"
-              :loading="loading"
-            >
-              {{ loading ? '翻译中...' : '开始翻译' }}
-            </el-button>
-          </div>
-        </div>
 
-        <div 
-          class="mode-button"
-          :class="{ 
-            active: mode === 'ar-zh',
-            expanded: expandedMode === 'ar-zh'
-          }"
-          @click="handleModeClick('ar-zh')"
-        >
-          <span class="mode-label">阿-中</span>
-          <div v-if="expandedMode === 'ar-zh'" class="expanded-controls">
-            <div class="quality-selector">
-              <div 
-                class="quality-option"
-                :class="{ active: quality === 'fast' }"
-                @click.stop="updateQuality('fast')"
-              >
-                速翻
-              </div>
-              <div 
-                class="quality-option"
-                :class="{ active: quality === 'standard' }"
-                @click.stop="updateQuality('standard')"
-              >
-                标准
-              </div>
-              <div 
-                class="quality-option"
-                :class="{ active: quality === 'premium' }"
-                @click.stop="updateQuality('premium')"
-              >
-                精修
-              </div>
-            </div>
-            <el-button 
-              type="primary" 
-              size="small"
-              @click.stop="handleTranslate"
-              :disabled="!quality"
-              :loading="loading"
+      <!-- 质量选择和翻译按钮区域 - 底部 -->
+      <div class="translation-section">
+        <div class="quality-selector">
+          <label class="quality-label">翻译质量</label>
+          <div class="quality-options">
+            <button 
+              class="quality-option"
+              :class="{ active: quality === 'fast' }"
+              @click="updateQuality('fast')"
             >
-              {{ loading ? '翻译中...' : '开始翻译' }}
-            </el-button>
+              速翻
+            </button>
+            <button 
+              class="quality-option"
+              :class="{ active: quality === 'standard' }"
+              @click="updateQuality('standard')"
+            >
+              标准
+            </button>
+            <button 
+              class="quality-option"
+              :class="{ active: quality === 'premium' }"
+              @click="updateQuality('premium')"
+            >
+              精修
+            </button>
           </div>
         </div>
+        
+        <el-button 
+          type="primary" 
+          size="default"
+          @click="handleTranslate"
+          :disabled="!quality"
+          :loading="loading"
+          class="translate-button gold-button"
+          style="--el-button-bg-color: #8B6914; --el-button-border-color: #8B6914; --el-button-hover-bg-color: #B8860B; --el-button-hover-border-color: #B8860B;"
+        >
+          {{ loading ? '翻译中...' : '开始翻译' }}
+        </el-button>
       </div>
     </div>
   </template>
@@ -138,10 +92,6 @@
       type: String,
       default: ''
     },
-    mode: {
-      type: String,
-      default: 'zh-ar'
-    },
     loading: Boolean
   })
   
@@ -150,11 +100,9 @@
     'update:reference',
     'update:directRequest',
     'update:quality',
-    'update:mode',
     'translate'
   ])
 
-  const expandedMode = ref(null)
   const localIntent = ref(props.intent || '')
   const localReference = ref(props.reference || '')
   const localDirectRequest = ref(props.directRequest || '')
@@ -191,15 +139,6 @@
     emit('update:quality', value)
   }
 
-  const handleModeClick = (mode) => {
-    if (expandedMode.value === mode) {
-      expandedMode.value = null
-    } else {
-      expandedMode.value = mode
-      emit('update:mode', mode)
-    }
-  }
-
   const handleTranslate = () => {
     emit('translate')
   }
@@ -207,79 +146,52 @@
   
   <style scoped>
   .translation-controls {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-md);
-    padding: 12px;
-    box-shadow: 
-      0 8px 32px var(--shadow-light),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(34, 139, 34, 0.4);
-    height: fit-content;
-    max-height: calc(100vh - 140px);
-    overflow-y: auto;
-    font-size: 12px;
-    color: var(--text-dark);
-    position: relative;
-  }
+  background: linear-gradient(135deg, 
+    #0d5015 0%, 
+    #166534 50%, 
+    #22c55e 100%);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(13, 80, 21, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  height: fit-content;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  font-size: 12px;
+  color: white;
+  position: relative;
+}
   
   .translation-controls::before {
     content: '';
     position: absolute;
-    left: 6px;
-    top: 15px;
-    bottom: 15px;
-    width: 2px;
+    left: 8px;
+    top: 20px;
+    bottom: 20px;
+    width: 3px;
     background: linear-gradient(180deg, 
       transparent 0%, 
-      var(--forest-green) 20%, 
-      var(--deep-green) 50%, 
-      var(--forest-green) 80%, 
+      rgba(255, 255, 255, 0.3) 20%, 
+      rgba(255, 255, 255, 0.6) 50%, 
+      rgba(255, 255, 255, 0.3) 80%, 
       transparent 100%);
-    opacity: 0.8;
-    border-radius: 1px;
+    border-radius: 2px;
   }
   
-  .translation-controls::after {
-    content: '';
-    position: absolute;
-    right: 6px;
-    top: 25%;
-    bottom: 25%;
-    width: 1px;
-    background: linear-gradient(180deg, 
-      transparent 0%, 
-      rgba(34, 139, 34, 0.6) 50%,
-      transparent 100%);
-    opacity: 0.7;
-  }
+
   
   .control-group {
-    margin-bottom: 12px;
-    position: relative;
-    padding-left: 8px;
+    margin-bottom: 16px;
   }
   
-  .control-group::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 3px;
-    height: 100%;
-    background: linear-gradient(180deg, 
-      rgba(34, 139, 34, 0.3) 0%,
-      rgba(80, 200, 120, 0.6) 50%,
-      rgba(34, 139, 34, 0.3) 100%);
-    border-radius: 0 2px 2px 0;
-  }
+
   
   .control-label {
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     font-weight: 600;
-    color: var(--text-dark);
-    font-size: 11px;
+    color: white;
+    font-size: 12px;
   }
   
   .control-input {
@@ -288,247 +200,251 @@
   
   .control-input :deep(.el-input__inner) {
     font-size: 11px;
-    padding: 6px 8px;
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(34, 139, 34, 0.4);
-    border-radius: var(--radius-sm);
-    color: var(--text-dark);
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    color: #0d5015;
     transition: all 0.3s ease;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    font-weight: 500;
   }
   
   .control-input :deep(.el-input__inner):focus {
-    border-color: var(--forest-green);
-    box-shadow: 
-      0 0 0 2px rgba(34, 139, 34, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.35);
+    border-color: white;
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
   }
   
   .control-input :deep(.el-textarea__inner) {
     font-size: 11px;
-    padding: 6px 8px;
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(34, 139, 34, 0.4);
-    border-radius: var(--radius-sm);
-    color: var(--text-dark);
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    color: #0d5015;
     transition: all 0.3s ease;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    font-weight: 500;
   }
   
   .control-input :deep(.el-textarea__inner):focus {
-    border-color: var(--forest-green);
-    box-shadow: 
-      0 0 0 2px rgba(34, 139, 34, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.35);
+    border-color: white;
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
   }
   
-  .mode-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 16px;
+  .control-input :deep(.el-input__inner)::placeholder,
+  .control-input :deep(.el-textarea__inner)::placeholder {
+    color: white !important;
+    font-style: italic;
+    font-weight: 400;
+    opacity: 0.7;
+  }
+  
+
+  
+  /* 翻译区域 - 底部 */
+  .translation-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
     position: relative;
   }
   
-  .mode-buttons::before {
+  .translation-section::before {
     content: '';
     position: absolute;
-    top: -8px;
-    left: 0;
-    right: 0;
-    height: 1px;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 2px;
     background: linear-gradient(90deg, 
       transparent 0%, 
-      rgba(34, 139, 34, 0.6) 50%,
+      rgba(255, 255, 255, 0.4) 50%,
       transparent 100%);
   }
   
-  .mode-button {
-    width: 100%;
-    height: 36px;
-    border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(34, 139, 34, 0.35);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  }
-  
-  .mode-button::before {
-    content: '';
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    width: 6px;
-    height: 6px;
-    border: 1px solid rgba(34, 139, 34, 0.6);
-    border-left: none;
-    border-bottom: none;
-    opacity: 0.8;
-  }
-  
-  .mode-button:hover {
-    border-color: var(--forest-green);
-    background: rgba(34, 139, 34, 0.15);
-    transform: translateY(-1px);
-    box-shadow: 
-      0 4px 16px var(--shadow-light),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  }
-  
-  .mode-button.active {
-    background: linear-gradient(135deg, var(--forest-green) 0%, var(--accent-emerald) 100%);
-    border-color: var(--deep-green);
-    color: white;
-    box-shadow: 
-      0 6px 20px rgba(34, 139, 34, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
-  
-  .mode-button.active::after {
-    content: '';
-    position: absolute;
-    bottom: 3px;
-    left: 3px;
-    width: 3px;
-    height: 3px;
-    background: var(--desert-gold);
-    border-radius: 50%;
-    opacity: 0.8;
-  }
-  
-  .mode-button.expanded {
-    width: 100%;
-    height: auto;
-    border-radius: var(--radius-sm);
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(15px);
-  }
-  
-  .mode-label {
-    font-size: 12px;
+  .quality-label {
+    display: block;
+    margin-bottom: 8px;
     font-weight: 600;
-    color: inherit;
-  }
-  
-  .expanded-controls {
-    margin-top: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
+    color: white;
+    font-size: 11px;
   }
   
   .quality-selector {
+    margin-bottom: 12px;
+  }
+  
+  .quality-options {
     display: flex;
-    flex-direction: column;
-    border-radius: var(--radius-sm);
+    gap: 4px;
+    border-radius: 20px;
     overflow: hidden;
     border: 1px solid rgba(34, 139, 34, 0.25);
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
-    position: relative;
-  }
-  
-  .quality-selector::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, 
-      transparent 0%, 
-      rgba(34, 139, 34, 0.3) 50%,
-      transparent 100%);
   }
   
   .quality-option {
     flex: 1;
-    padding: 6px 8px;
+    padding: 8px 6px;
     text-align: center;
     cursor: pointer;
     background: rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid rgba(34, 139, 34, 0.15);
+    border: none;
+    border-right: 1px solid rgba(34, 139, 34, 0.15);
     transition: all 0.3s ease;
     font-size: 11px;
     font-weight: 500;
+    color: white;
     position: relative;
-    color: var(--text-dark);
   }
   
   .quality-option:last-child {
-    border-bottom: none;
+    border-right: none;
   }
   
   .quality-option:hover {
     background: rgba(34, 139, 34, 0.15);
-    color: var(--text-dark);
-    transform: translateX(2px);
-    box-shadow: inset 3px 0 0 var(--forest-green);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(34, 139, 34, 0.2);
   }
   
   .quality-option.active {
     background: linear-gradient(135deg, var(--forest-green) 0%, var(--accent-emerald) 100%);
     color: white;
     font-weight: 600;
+    transform: translateY(-1px);
     box-shadow: 
-      0 2px 8px rgba(34, 139, 34, 0.3),
+      0 4px 12px rgba(34, 139, 34, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
   
   .quality-option.active::after {
     content: '';
     position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 2px;
     background: white;
-    border-radius: 50%;
+    border-radius: 1px;
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
   }
   
-  .expanded-controls :deep(.el-button) {
-    font-size: 11px;
-    padding: 6px 12px;
-    height: auto;
-    background: linear-gradient(135deg, var(--forest-green) 0%, var(--accent-emerald) 100%);
-    border: none;
-    border-radius: var(--radius-sm);
-    color: white;
+  .translate-button {
+    width: 100%;
+    height: 38px;
+    font-size: 12px;
     font-weight: 600;
+    border-radius: 19px;
     transition: all 0.3s ease;
-    box-shadow: 
-      0 4px 12px rgba(34, 139, 34, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
   }
   
-  .expanded-controls :deep(.el-button:hover) {
-    transform: translateY(-1px);
-    box-shadow: 
-      0 6px 20px rgba(34, 139, 34, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  .translate-button :deep(.el-button),
+  .translate-button :deep(.el-button.el-button--primary) {
+    background: linear-gradient(135deg, #8B6914 0%, #B8860B 100%) !important;
+    background-color: #8B6914 !important;
+    border-color: #8B6914 !important;
+    color: white !important;
+    font-weight: 600;
   }
   
-  .expanded-controls :deep(.el-button:disabled) {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--text-light);
+  .translate-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.2) 50%, 
+      transparent 100%);
+    transition: left 0.6s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .translate-button:hover {
+    transform: translateY(-2px);
+  }
+  
+  .translate-button:hover :deep(.el-button),
+  .translate-button:hover :deep(.el-button.el-button--primary) {
+    background: linear-gradient(135deg, #B8860B 0%, #CD853F 100%) !important;
+    background-color: #B8860B !important;
+    border-color: #B8860B !important;
+    box-shadow: 
+      0 6px 20px rgba(139, 105, 20, 0.4),
+      0 0 15px rgba(184, 134, 11, 0.3) !important;
+  }
+  
+  .translate-button:hover::before {
+    left: 100%;
+  }
+  
+  .translate-button:active {
+    transform: translateY(0);
+  }
+  
+  .translate-button :deep(.el-button:disabled),
+  .translate-button :deep(.el-button.el-button--primary:disabled) {
+    background: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(128, 128, 128, 0.3) !important;
+    color: rgba(255, 255, 255, 0.5) !important;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  /* 添加更强的样式覆盖 */
+  .translate-button :deep(.el-button--primary),
+  .translate-button :deep(.el-button--primary:not(.is-disabled)),
+  .translate-button :deep(.el-button--primary:focus),
+  .translate-button :deep(.el-button--primary:active) {
+    background: linear-gradient(135deg, #8B6914 0%, #B8860B 100%) !important;
+    background-color: #8B6914 !important;
+    border-color: #8B6914 !important;
+    color: white !important;
+  }
+  
+  .translate-button:hover :deep(.el-button--primary),
+  .translate-button:hover :deep(.el-button--primary:not(.is-disabled)),
+  .translate-button:hover :deep(.el-button--primary:focus),
+  .translate-button:hover :deep(.el-button--primary:active) {
+    background: linear-gradient(135deg, #B8860B 0%, #CD853F 100%) !important;
+    background-color: #B8860B !important;
+    border-color: #B8860B !important;
+    color: white !important;
+  }
+  
+  .translate-button:has(:disabled) {
+    transform: none !important;
+  }
+  
+  .translate-button:has(:disabled)::before {
+    display: none;
+  }
+  
+  /* 金色按钮的额外样式覆盖 */
+  .gold-button.el-button--primary {
+    --el-color-primary: #8B6914 !important;
+    --el-color-primary-light-3: #B8860B !important;
+    --el-color-primary-light-5: #CD853F !important;
+    --el-color-primary-light-7: #DAA520 !important;
+    --el-color-primary-light-8: #F0E68C !important;
+    --el-color-primary-light-9: #FFFFE0 !important;
+    --el-color-primary-dark-2: #704D0A !important;
+    background: linear-gradient(135deg, #8B6914 0%, #B8860B 100%) !important;
+    border-color: #8B6914 !important;
+  }
+  
+  .gold-button.el-button--primary:hover {
+    background: linear-gradient(135deg, #B8860B 0%, #CD853F 100%) !important;
+    border-color: #B8860B !important;
   }
   </style>
   

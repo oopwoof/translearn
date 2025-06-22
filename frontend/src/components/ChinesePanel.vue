@@ -1,5 +1,9 @@
 <template>
-    <div class="chinese-panel">
+    <div class="chinese-panel" :class="{ 'show-input-hint': showInputHint }">
+      <!-- 输入提示效果 -->
+      <div v-if="showInputHint" class="input-hint-overlay">
+      </div>
+      
       <div class="panel-header">
         <h4>中文</h4>
         <div class="panel-actions">
@@ -67,6 +71,10 @@
     loading: {
       type: Boolean,
       default: false
+    },
+    showInputHint: {
+      type: Boolean,
+      default: false
     }
   })
   
@@ -90,7 +98,7 @@
 .chinese-panel {
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   box-shadow: 
     0 8px 32px var(--shadow-light),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
@@ -174,6 +182,13 @@
   padding-left: 8px;
 }
 
+/* 确保统一背景标题的显示效果 */
+.panel-header h4.unified-title-bg {
+  margin: -12px -16px -12px -16px;
+  padding: 12px 16px;
+  border-radius: 20px 20px 0 0;
+}
+
 /* 为中文标题添加左侧装饰 */
 .panel-header h4::before {
   content: '';
@@ -253,7 +268,7 @@
   background: rgba(255, 255, 255, 0.1); /* 降低背景不透明度 */
   backdrop-filter: blur(10px);
   border: 1px solid rgba(34, 139, 34, 0.3); /* 使用森林绿 */
-  border-radius: var(--radius-sm);
+  border-radius: 15px;
   color: var(--text-dark);
   transition: all 0.3s ease;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
@@ -354,21 +369,21 @@
 .panel-actions :deep(.el-button) {
   font-size: 11px;
   padding: 6px 12px;
-  border-radius: var(--radius-sm);
+  border-radius: 15px;
   font-weight: 600;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.panel-actions :deep(.el-button--primary) {
-  background: linear-gradient(135deg, var(--forest-green) 0%, var(--accent-emerald) 100%);
-  border: none;
-  color: white;
-  box-shadow: 
-    0 4px 12px rgba(34, 139, 34, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
+  .panel-actions :deep(.el-button--primary) {
+    background: linear-gradient(135deg, var(--forest-green) 0%, var(--accent-emerald) 100%);
+    border: none;
+    color: black;
+    box-shadow: 
+      0 4px 12px rgba(34, 139, 34, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
 
 .panel-actions :deep(.el-button--primary:hover) {
   transform: translateY(-1px);
@@ -386,13 +401,46 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.panel-actions :deep(.el-button:not(.el-button--primary):hover) {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 
-    0 4px 16px var(--shadow-light),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  border-color: var(--forest-green);
-}
-</style>
+  .panel-actions :deep(.el-button:not(.el-button--primary):hover) {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 
+      0 4px 16px var(--shadow-light),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border-color: var(--forest-green);
+  }
+
+  /* 输入提示效果 */
+  .input-hint-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      rgba(34, 139, 34, 0.8) 0%, 
+      rgba(34, 139, 34, 0.6) 30%, 
+      rgba(34, 139, 34, 0.4) 60%, 
+      rgba(34, 139, 34, 0.2) 80%, 
+      rgba(34, 139, 34, 0.1) 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+    animation: pulseHint 2s ease-in-out infinite;
+  }
+
+
+
+  .chinese-panel.show-input-hint {
+    position: relative;
+  }
+
+  @keyframes pulseHint {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
+  </style>
 

@@ -10,7 +10,7 @@
   --sage-green: #9caf88;           /* 鼠尾草绿 - 用于装饰 */
   --desert-gold: #cd9500;          /* 沙漠金 - 仅点缀用 */
   --desert-gold-light: #f4c430;    /* 明亮金色 - 仅点缀用 */
-  --emerald-green: #50c878;        /* 翡翠绿 - 辅助色 */
+  --accent-emerald: #50c878;       /* 翡翠绿 - 辅助色 */
   --text-dark: #1a2e1a;            /* 深绿色文字，确保可见性 */
   --text-medium: #2d4a2d;          /* 中等绿色文字 */
   --text-light: #4a6b4a;           /* 浅绿色文字 */
@@ -95,3 +95,7 @@ a,
     padding: 0;
   }
 }
+
+
+
+

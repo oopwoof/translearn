@@ -1,5 +1,9 @@
 <template>
-    <div class="arabic-panel">
+    <div class="arabic-panel" :class="{ 'show-input-hint': showInputHint }">
+      <!-- 输入提示效果 -->
+      <div v-if="showInputHint" class="input-hint-overlay">
+      </div>
+      
       <div class="panel-header">
         <h4>阿拉伯语</h4>
         <div class="panel-actions">
@@ -68,6 +72,10 @@
     loading: {
       type: Boolean,
       default: false
+    },
+    showInputHint: {
+      type: Boolean,
+      default: false
     }
   })
   
@@ -89,21 +97,21 @@
   
   <style scoped>
   .arabic-panel {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-md);
-    box-shadow: 
-      0 8px 32px var(--shadow-light),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(34, 139, 34, 0.3);
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-    color: var(--text-dark);
-    position: relative;
-  }
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  box-shadow: 
+    0 8px 32px var(--shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(34, 139, 34, 0.3);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--text-dark);
+  position: relative;
+}
   
   .arabic-panel::before {
     content: '';
@@ -170,6 +178,15 @@
     font-weight: 700;
     position: relative;
     padding-right: 8px;
+    text-align: right;
+    direction: rtl;
+  }
+
+  /* 确保统一背景标题的显示效果 */
+  .panel-header h4.unified-title-bg {
+    margin: -12px -16px -12px -16px;
+    padding: 12px 16px;
+    border-radius: 20px 20px 0 0;
   }
   
   .panel-header h4::after {
@@ -239,22 +256,22 @@
   }
   
   .arabic-input :deep(.el-textarea__inner) {
-    height: 100% !important;
-    resize: none;
-    font-size: 13px;
-    line-height: 1.6;
-    font-family: 'Noto Sans Arabic', 'Amiri', 'Arabic Typesetting', 'Arial Unicode MS', sans-serif;
-    direction: rtl;
-    text-align: right;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(34, 139, 34, 0.3);
-    border-radius: var(--radius-sm);
-    color: var(--text-dark);
-    transition: all 0.3s ease;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  }
+  height: 100% !important;
+  resize: none;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: 'Noto Sans Arabic', 'Amiri', 'Arabic Typesetting', 'Arial Unicode MS', sans-serif;
+  direction: rtl;
+  text-align: right;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(34, 139, 34, 0.3);
+  border-radius: 15px;
+  color: var(--text-dark);
+  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
   
   .arabic-input :deep(.el-textarea__inner):focus {
     border-color: var(--forest-green);
@@ -348,19 +365,19 @@
   }
   
   .panel-actions :deep(.el-button) {
-    font-size: 11px;
-    padding: 6px 12px;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  }
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
   
   .panel-actions :deep(.el-button--primary) {
     background: linear-gradient(135deg, var(--forest-green) 0%, var(--accent-emerald) 100%);
     border: none;
-    color: white;
+    color: black;
     box-shadow: 
       0 4px 12px rgba(34, 139, 34, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -390,5 +407,37 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.3);
     border-color: var(--forest-green);
   }
+
+  /* 输入提示效果 */
+  .input-hint-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      rgba(34, 139, 34, 0.8) 0%, 
+      rgba(34, 139, 34, 0.6) 30%, 
+      rgba(34, 139, 34, 0.4) 60%, 
+      rgba(34, 139, 34, 0.2) 80%, 
+      rgba(34, 139, 34, 0.1) 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: none;
+    animation: pulseHint 2s ease-in-out infinite;
+  }
+
+
+
+  .arabic-panel.show-input-hint {
+    position: relative;
+  }
+
+  @keyframes pulseHint {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+  }
   </style>
-  

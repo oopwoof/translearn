@@ -6,10 +6,18 @@
       <div class="ball-drop-zone" 
            @dragover.prevent
            @drop.prevent="handleDrop"
-           :class="{ 'has-balls': selectedBalls.length > 0 }"
+           :class="{ 
+             'has-balls': selectedBalls.length > 0,
+             'show-breath-hint': showAnalysisHint && selectedBalls.length === 0 && !hasAnyDisplayedContent && props.currentText && props.currentText.trim().length > 0
+           }"
       >
         <div v-if="selectedBalls.length === 0" class="drop-hint">
           拖拽功能球到这里
+        </div>
+        
+        <!-- 呼吸提示动画 -->
+        <div v-if="showAnalysisHint && selectedBalls.length === 0 && !hasAnyDisplayedContent && props.currentText && props.currentText.trim().length > 0" class="breath-hint-overlay">
+          <div class="breath-hint-text">拖拽功能球开始分析</div>
         </div>
         <div v-else class="selected-balls">
           <div v-for="ball in selectedBalls" 
@@ -17,7 +25,6 @@
                class="selected-ball"
                :class="{ 'analyzed': isAnalyzed(ball.id), 'pending': isPending(ball.id) }"
           >
-            <el-icon><component :is="ball.icon" /></el-icon>
             <span>{{ ball.label }}</span>
             <div class="ball-status">
               <el-icon v-if="isAnalyzed(ball.id)" class="status-icon analyzed-icon">
@@ -167,6 +174,10 @@
     currentText: {
       type: String,
       default: ''
+    },
+    showAnalysisHint: {
+      type: Boolean,
+      default: false
     }
   })
   
@@ -433,7 +444,6 @@
             selectedBalls.value.push({
               id: ballData.id,
               label: ballData.label,
-              icon: ballData.icon,
               prompt: ballData.prompt
             })
             addedCount++
@@ -458,7 +468,6 @@
         selectedBalls.value.push({
           id: ballData.id,
           label: ballData.label,
-          icon: ballData.icon,
           prompt: ballData.prompt
         })
         
@@ -679,21 +688,21 @@
   
   <style scoped>
   .analysis-panel {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-md);
-    padding: 15px;
-    box-shadow: 
-      0 8px 32px var(--shadow-light),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(34, 139, 34, 0.3); /* 使用森林绿 */
-    height: fit-content;
-    max-height: calc(100vh - 140px);
-    overflow-y: auto;
-    font-size: 13px;
-    color: var(--text-dark);
-    position: relative;
-  }
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 
+    0 8px 32px var(--shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(34, 139, 34, 0.3); /* 使用森林绿 */
+  height: fit-content;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  font-size: 13px;
+  color: var(--text-dark);
+  position: relative;
+}
   
   /* 添加顶部装饰线条 */
   .analysis-panel::before {
@@ -738,6 +747,13 @@
     position: relative;
     padding-left: 10px;
   }
+
+  /* 确保统一背景标题的显示效果 */
+  .analysis-panel h3.unified-title-bg {
+    margin: -15px -15px 15px -15px;
+    padding: 15px;
+    border-radius: 20px 20px 8px 8px;
+  }
   
   /* 为标题添加装饰线条 */
   .analysis-panel h3::before {
@@ -756,10 +772,10 @@
     background: rgba(240, 248, 240, 0.1);
     backdrop-filter: blur(10px);
     border: 2px dashed rgba(34, 139, 34, 0.6); /* 使用森林绿 */
-    border-radius: var(--radius-sm);
+    border-radius: 20px;
     padding: 12px;
     margin-bottom: 12px;
-    min-height: 80px;
+    min-height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -814,8 +830,8 @@
   .selected-ball {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10px);
-    border-radius: var(--radius-sm);
-    padding: 6px 8px;
+    border-radius: 20px;
+    padding: 4px 12px;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -827,6 +843,7 @@
     border: 1px solid rgba(34, 139, 34, 0.2); /* 使用森林绿 */
     position: relative;
     transition: all 0.3s ease;
+    min-height: 24px;
   }
 
   .selected-ball.analyzed {
@@ -890,7 +907,7 @@
   .instruction-card {
     background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(15px);
-    border-radius: var(--radius-sm);
+    border-radius: 15px;
     padding: 10px;
     border-left: 3px solid var(--forest-green); /* 主要使用森林绿 */
     border: 1px solid rgba(34, 139, 34, 0.2); /* 使用森林绿 */
@@ -960,7 +977,7 @@
     padding: 6px;
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(5px);
-    border-radius: var(--radius-sm);
+    border-radius: 12px;
     border: 1px solid var(--glass-border);
   }
 
@@ -1021,7 +1038,7 @@
     padding: 10px;
     background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(10px);
-    border-radius: var(--radius-sm);
+    border-radius: 15px;
     border: 1px solid var(--glass-border);
   }
 
@@ -1047,7 +1064,7 @@
     padding: 12px;
     background: rgba(248, 250, 252, 0.5);
     backdrop-filter: blur(10px);
-    border-radius: var(--radius-sm);
+    border-radius: 15px;
     border: 1px solid var(--glass-border);
     box-shadow: 0 4px 16px var(--shadow-light);
   }
@@ -1084,8 +1101,8 @@
     font-size: 12px;
     background: linear-gradient(135deg, var(--forest-green) 0%, var(--accent-emerald) 100%);
     border: none;
-    border-radius: var(--radius-sm);
-    color: white;
+    border-radius: 20px;
+    color: black;
     font-weight: 600;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(34, 139, 34, 0.3); /* 使用森林绿 */
@@ -1130,6 +1147,51 @@
   .analysis-panel :deep(.el-progress-bar__inner) {
     background: linear-gradient(135deg, var(--forest-green) 0%, var(--accent-emerald) 100%);
     border-radius: 10px;
+  }
+
+  /* 拖拽区域呼吸提示动画 */
+  .ball-drop-zone.show-breath-hint {
+    animation: breatheDropZone 3s ease-in-out infinite;
+  }
+
+  .breath-hint-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .breath-hint-text {
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    background: rgba(34, 139, 34, 0.85);
+    padding: 8px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(34, 139, 34, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(34, 139, 34, 0.7);
+    opacity: 0.9;
+  }
+
+  @keyframes breatheDropZone {
+    0%, 100% { 
+      background: rgba(240, 248, 240, 0.1);
+      border-color: rgba(34, 139, 34, 0.6);
+      transform: scale(1);
+    }
+    50% { 
+      background: rgba(34, 139, 34, 0.2);
+      border-color: rgba(34, 139, 34, 0.8);
+      transform: scale(1.02);
+    }
   }
   </style>
 

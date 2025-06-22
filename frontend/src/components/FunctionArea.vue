@@ -1,5 +1,8 @@
 <template>
-  <div class="function-area" :class="{ expanded: isExpanded }">
+  <div class="function-area" :class="{ 
+    expanded: isExpanded,
+    'show-breath': currentText && currentText.trim() && selectedBallIds.length === 0 && excludedBallIds.length === 0
+  }">
     <div class="function-container">
       <div 
         class="function-grid"
@@ -11,13 +14,14 @@
         ref="functionGridRef"
       >
         <FunctionBall
-          v-for="ball in availableFunctionBalls"
+          v-for="(ball, index) in availableFunctionBalls"
           :key="ball.id"
           v-bind="ball"
           :disabled="ball.disabled"
           :disabledReason="ball.disabledReason"
           :selected="selectedBallIds.includes(ball.id)"
           :ref="el => setBallRef(ball.id, el)"
+          :style="{ '--i': index }"
           @dragstart="handleDragStart"
           @dragend="handleDragEnd"
           @click="handleBallClick"
@@ -44,28 +48,32 @@ import { ref, computed, watch, nextTick, provide } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
 import FunctionBall from './FunctionBall.vue'
 
-const props = defineProps({
-  mode: {
-    type: String,
-    default: 'zh-ar'
-  },
-  intent: {
-    type: String,
-    default: ''
-  },
-  reference: {
-    type: String,
-    default: ''
-  },
-  directRequest: {
-    type: String,
-    default: ''
-  },
-  excludedBallIds: {
-    type: Array,
-    default: () => []
-  }
-})
+  const props = defineProps({
+    mode: {
+      type: String,
+      default: 'zh-ar'
+    },
+    intent: {
+      type: String,
+      default: ''
+    },
+    reference: {
+      type: String,
+      default: ''
+    },
+    directRequest: {
+      type: String,
+      default: ''
+    },
+    excludedBallIds: {
+      type: Array,
+      default: () => []
+    },
+    currentText: {
+      type: String,
+      default: ''
+    }
+  })
 
 const emit = defineEmits(['ball-removed'])
 
@@ -109,7 +117,6 @@ const allFunctionBalls = computed(() => {
     {
       id: 'text-features',
       label: '文本特征分析',
-      icon: 'Document',
       prompt: '输出文本特征',
       disabled: false,
       disabledReason: ''
@@ -117,7 +124,6 @@ const allFunctionBalls = computed(() => {
     {
       id: 'terminology',
       label: '专业术语、成语/习语',
-      icon: 'Collection',
       prompt: '输出文本专业术语、成语/习语',
       disabled: false,
       disabledReason: ''
@@ -125,7 +131,6 @@ const allFunctionBalls = computed(() => {
     {
       id: 'suggestions',
       label: '翻译建议',
-      icon: 'Light',
       prompt: '给出可直接供人工翻译使用的翻译建议',
       disabled: false,
       disabledReason: ''
@@ -133,7 +138,6 @@ const allFunctionBalls = computed(() => {
     {
       id: 'intent-analysis',
       label: '翻译意图/受众分析',
-      icon: 'User',
       prompt: '分析翻译意图和受众',
       disabled: !props.intent || !props.intent.trim(),
       disabledReason: !props.intent || !props.intent.trim() ? '请先在控制面板输入"意图/受众"' : ''
@@ -141,7 +145,6 @@ const allFunctionBalls = computed(() => {
     {
       id: 'reference-analysis',
       label: '参考译文风格分析',
-      icon: 'Files',
       prompt: '分析参考译文风格',
       disabled: !props.reference || !props.reference.trim(),
       disabledReason: !props.reference || !props.reference.trim() ? '请先在控制面板输入"参考译文风格"' : ''
@@ -149,7 +152,6 @@ const allFunctionBalls = computed(() => {
     {
       id: 'direct-request-analysis',
       label: '直接要求分析',
-      icon: 'Flag',
       prompt: '分析直接要求',
       disabled: !props.directRequest || !props.directRequest.trim(),
       disabledReason: !props.directRequest || !props.directRequest.trim() ? '请先在控制面板输入"直接要求"' : ''
@@ -161,6 +163,8 @@ const allFunctionBalls = computed(() => {
 const availableFunctionBalls = computed(() => {
   return allFunctionBalls.value.filter(ball => !props.excludedBallIds.includes(ball.id))
 })
+
+
 
 const toggleExpand = () => {
   isExpanded.value = !isExpanded.value
@@ -373,7 +377,7 @@ const handleBallClick = (ball) => {
 
 <style scoped>
 .function-area {
-  background: rgba(255, 255, 255, 0.05); /* 进一步降低不透明度 */
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(15px);
   padding: 8px 15px;
   transition: all 0.3s ease;
@@ -385,51 +389,30 @@ const handleBallClick = (ball) => {
   position: relative;
 }
 
-/* 添加顶部装饰线条 */
-.function-area::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    var(--forest-green) 20%, 
-    var(--deep-green) 50%, 
-    var(--forest-green) 80%, 
-    transparent 100%);
-  opacity: 0.8;
-}
-
 .function-container {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   padding: 8px 15px;
   box-shadow: 
     0 8px 32px var(--shadow-light),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(34, 139, 34, 0.4); /* 使用森林绿 */
+  border: 1px solid rgba(34, 139, 34, 0.4);
   position: relative;
   transition: all 0.3s ease;
 }
 
-/* 添加内部装饰线条 */
-.function-container::after {
-  content: '';
-  position: absolute;
-  bottom: 4px;
-  left: 20px;
-  right: 20px;
-  height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(34, 139, 34, 0.5) 50%, /* 使用森林绿 */
-    transparent 100%);
+.function-area:not(.expanded) .function-container {
+  max-width: 360px;
+  width: auto;
+}
+
+.function-area.expanded {
+  position: relative !important;
+  z-index: 100 !important; /* 降低z-index，确保logo在上方 */
 }
 
 .function-grid {
@@ -456,7 +439,7 @@ const handleBallClick = (ball) => {
   height: 24px;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(15px);
-  border: 1px solid rgba(34, 139, 34, 0.6); /* 使用森林绿 */
+  border: 1px solid rgba(34, 139, 34, 0.6);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -466,7 +449,7 @@ const handleBallClick = (ball) => {
     0 4px 16px var(--shadow-light),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
-  z-index: 1;
+  z-index: 101 !important; /* 略高于展开容器但低于logo */
 }
 
 .expand-button:hover {
@@ -492,14 +475,73 @@ const handleBallClick = (ball) => {
   transform: rotate(180deg);
 }
 
+
+
 .function-area.expanded .function-container {
-  padding-bottom: 24px;
+  position: relative !important;
+  width: auto !important;
+  min-width: 320px !important;
+  max-width: 450px !important;
+  z-index: 100 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(80px) !important;
+  border: 2px solid rgba(34, 139, 34, 0.8) !important;
+  box-shadow: 
+    0 25px 80px rgba(0, 0, 0, 0.4),
+    0 12px 40px rgba(34, 139, 34, 0.5) !important;
+  border-radius: 12px !important;
+  margin: 0 auto !important;
+  transform: translateY(30%) !important; /* 向下移动30% */
+  padding: 12px 15px 20px 15px !important;
+}
+
+.function-area.expanded .function-grid {
+  justify-content: center;
+  align-items: center;
+  max-height: none !important;
+  overflow: visible !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  padding: 12px 8px !important;
+}
+
+.function-area.expanded .function-grid .function-ball {
+  display: block !important;
+  animation: slideInDown 0.3s ease-out;
+  margin: 0 !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+
+
+.function-area.expanded .function-grid .function-ball:nth-child(n+4) {
+  animation-delay: calc((var(--i, 0) - 3) * 0.1s);
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .function-area:not(.expanded) .function-grid {
-  max-height: 60px;
+  max-height: 52px;
   overflow: hidden;
+  justify-content: flex-start;
 }
+
+.function-area:not(.expanded) .function-grid .function-ball:nth-child(n+4) {
+  display: none;
+}
+
+
 
 .selection-box {
   position: absolute;
@@ -507,7 +549,7 @@ const handleBallClick = (ball) => {
   background: rgba(34, 139, 34, 0.15); /* 使用森林绿 */
   box-sizing: border-box;
   pointer-events: none;
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   animation: selection-pulse 1.5s ease-in-out infinite alternate;
 }
 
@@ -535,6 +577,55 @@ const handleBallClick = (ball) => {
   to {
     box-shadow: 0 12px 35px rgba(0, 100, 0, 0.6); /* 使用深绿色 */
     transform: translateY(-4px);
+  }
+}
+
+/* FunctionArea呼吸动画 */
+.function-area.show-breath .function-container {
+  animation: breatheFunctionArea 3s ease-in-out infinite;
+}
+
+@keyframes breatheFunctionArea {
+  0%, 100% { 
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(34, 139, 34, 0.4);
+    transform: scale(1);
+  }
+  50% { 
+    background: rgba(34, 139, 34, 0.15);
+    border-color: rgba(34, 139, 34, 0.7);
+    transform: scale(1.01);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .function-area.expanded .function-container {
+    max-width: 400px !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  .function-area.expanded .function-container {
+    max-width: 350px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .function-area.expanded .function-container {
+    min-width: 280px !important;
+    max-width: calc(100vw - 40px) !important;
+    margin: 0 20px !important;
+    padding: 8px 15px 20px 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .function-area.expanded .function-container {
+    min-width: 260px !important;
+    max-width: calc(100vw - 20px) !important;
+    margin: 0 10px !important;
+    backdrop-filter: blur(60px) !important;
   }
 }
 </style> 

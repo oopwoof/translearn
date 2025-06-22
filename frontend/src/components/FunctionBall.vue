@@ -13,7 +13,6 @@
     :title="disabled ? disabledReason : ''"
   >
     <div class="ball-content">
-      <el-icon class="ball-icon"><component :is="icon" /></el-icon>
       <span class="ball-label">{{ label }}</span>
     </div>
     
@@ -42,10 +41,7 @@ const props = defineProps({
     type: String,
     required: true
   },
-  icon: {
-    type: String,
-    required: true
-  },
+
   prompt: {
     type: String,
     required: true
@@ -98,7 +94,6 @@ const handleDragStart = (e) => {
         id: props.id,
         label: props.label,
         prompt: props.prompt,
-        icon: props.icon,
         selected: props.selected,
         isMultiDrag: false
       }
@@ -129,8 +124,8 @@ const handleClick = (e) => {
 <style scoped>
 .function-ball {
   width: 80px;
-  height: 80px;
-  border-radius: var(--radius-md);
+  height: 48px;
+  border-radius: 40px 40px 40px 40px;
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(34, 139, 34, 0.3);
@@ -156,7 +151,7 @@ const handleClick = (e) => {
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: var(--radius-md);
+  border-radius: 40px;
   padding: 1px;
   background: linear-gradient(135deg, 
     var(--forest-green) 0%, 
@@ -227,37 +222,28 @@ const handleClick = (e) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
   pointer-events: none;
   z-index: 1;
+  height: 100%;
 }
 
-.ball-icon {
-  font-size: 22px;
-  color: var(--text-dark);
-  transition: all 0.3s ease;
-}
 
-.function-ball.is-disabled .ball-icon {
-  color: var(--text-light);
-}
-
-.function-ball.is-selected .ball-icon {
-  color: var(--forest-green);
-  transform: scale(1.1);
-}
 
 .ball-label {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-dark);
   text-align: center;
   font-weight: 500;
   max-width: 72px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  padding: 0 4px;
   transition: all 0.3s ease;
-  line-height: 1.2;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .function-ball.is-disabled .ball-label {
@@ -335,7 +321,7 @@ const handleClick = (e) => {
   bottom: 0;
   background: rgba(128, 128, 128, 0.6);
   backdrop-filter: blur(2px);
-  border-radius: var(--radius-md);
+  border-radius: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
