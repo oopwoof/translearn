@@ -4,8 +4,7 @@
     :class="{ 
       'is-dragging': isDragging,
       'is-disabled': disabled,
-      'is-selected': selected,
-      'is-confirmed': confirmed
+      'is-selected': selected
     }"
     :draggable="!disabled"
     @dragstart="handleDragStart"
@@ -19,13 +18,8 @@
     </div>
     
     <!-- 选中状态指示器 -->
-    <div v-if="selected && !confirmed" class="selected-indicator">
+    <div v-if="selected" class="selected-indicator">
       <el-icon class="check-icon"><Check /></el-icon>
-    </div>
-    
-    <!-- 确认状态指示器 -->
-    <div v-if="confirmed" class="confirmed-indicator">
-      <el-icon class="star-icon"><Star /></el-icon>
     </div>
     
     <div v-if="disabled" class="disabled-overlay">
@@ -37,7 +31,7 @@
 <script setup>
 import { ref, inject, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Lock, Check, Star } from '@element-plus/icons-vue'
+import { Lock, Check } from '@element-plus/icons-vue'
 
 const props = defineProps({
   id: {
@@ -65,10 +59,6 @@ const props = defineProps({
     default: ''
   },
   selected: {
-    type: Boolean,
-    default: false
-  },
-  confirmed: {
     type: Boolean,
     default: false
   }
@@ -130,21 +120,19 @@ const handleClick = (e) => {
     return
   }
   
-  // 阻止事件冒泡
+  // 阻止事件冒泡，避免触发父组件的圈选
   e.stopPropagation()
-  
-  // 发送点击事件给父组件
   emit('click', props)
 }
 </script>
 
 <style scoped>
 .function-ball {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   cursor: move;
   transition: all 0.3s;
   display: flex;
@@ -155,35 +143,11 @@ const handleClick = (e) => {
   position: relative;
   z-index: 1;
   border: 2px solid transparent;
-  flex-shrink: 0;
-}
-
-/* 🏜️ 功能球沙漠装饰 */
-.function-ball::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: 50%;
-  background: 
-    radial-gradient(circle at 30% 30%, var(--sand-texture) 0%, transparent 70%),
-    radial-gradient(circle at 70% 70%, var(--geometric-pattern) 0%, transparent 70%);
-  opacity: 0.2;
-  pointer-events: none;
-  z-index: 0;
 }
 
 .function-ball:hover:not(.is-disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: var(--sky-horizon-blue);
-}
-
-.function-ball:hover:not(.is-disabled)::before {
-  opacity: 0.4;
-  animation: oasis-ripple 2s ease-out;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .function-ball.is-dragging {
@@ -200,62 +164,31 @@ const handleClick = (e) => {
 
 .function-ball.is-disabled:hover {
   transform: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .function-ball.is-selected {
-  border-color: var(--desert-oasis-green);
-  box-shadow: 
-    0 2px 8px rgba(34, 139, 34, 0.3),
-    0 0 0 4px rgba(34, 139, 34, 0.1);
-  background: radial-gradient(circle at center, rgba(34, 139, 34, 0.05) 0%, white 70%);
+  border-color: #409EFF;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
 }
 
 .function-ball.is-selected:hover {
-  box-shadow: 
-    0 4px 12px rgba(34, 139, 34, 0.4),
-    0 0 0 6px rgba(34, 139, 34, 0.15);
-  animation: oasis-pulse 2s infinite;
-}
-
-.function-ball.is-confirmed {
-  border-color: var(--desert-sand-gold);
-  box-shadow: 0 2px 8px rgba(232, 216, 176, 0.4);
-  background: linear-gradient(135deg, 
-    rgba(232, 216, 176, 0.1) 0%, 
-    white 50%, 
-    rgba(199, 177, 225, 0.1) 100%);
-}
-
-.function-ball.is-confirmed:hover {
-  box-shadow: 0 4px 12px rgba(232, 216, 176, 0.6);
-  transform: translateY(-2px);
-}
-
-.function-ball.is-confirmed .ball-icon {
-  color: var(--desert-sand-gold);
-}
-
-.function-ball.is-confirmed .ball-label {
-  color: var(--desert-sand-gold);
-  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
 }
 
 .ball-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
   pointer-events: none;
   z-index: 1;
 }
 
 .ball-icon {
-  font-size: 20px;
-  color: var(--sky-horizon-blue);
+  font-size: 28px;
+  color: #1E3050;
   transition: color 0.3s;
-  z-index: 2;
-  position: relative;
 }
 
 .function-ball.is-disabled .ball-icon {
@@ -263,22 +196,19 @@ const handleClick = (e) => {
 }
 
 .function-ball.is-selected .ball-icon {
-  color: var(--desert-oasis-green);
+  color: #409EFF;
 }
 
 .ball-label {
-  font-size: 9px;
-  color: var(--deep-blue);
+  font-size: 13px;
+  color: #1E3050;
   text-align: center;
   font-weight: 500;
-  max-width: 50px;
+  max-width: 90px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   transition: color 0.3s;
-  line-height: 1.1;
-  z-index: 2;
-  position: relative;
 }
 
 .function-ball.is-disabled .ball-label {
@@ -286,7 +216,7 @@ const handleClick = (e) => {
 }
 
 .function-ball.is-selected .ball-label {
-  color: var(--desert-oasis-green);
+  color: #409EFF;
   font-weight: 600;
 }
 
@@ -294,49 +224,28 @@ const handleClick = (e) => {
   position: absolute;
   top: -2px;
   right: -2px;
-  width: 16px;
-  height: 16px;
-  background: var(--desert-oasis-green);
+  width: 20px;
+  height: 20px;
+  background: #409EFF;
   border: 2px solid white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 3;
-  animation: twinkle 2s ease-in-out infinite alternate;
 }
 
 .check-icon {
-  font-size: 8px;
-  color: white;
-}
-
-.confirmed-indicator {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 16px;
-  height: 16px;
-  background: #FFD700;
-  border: 2px solid white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 3;
-}
-
-.star-icon {
-  font-size: 8px;
+  font-size: 12px;
   color: white;
 }
 
 .disabled-overlay {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 16px;
-  height: 16px;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   display: flex;
@@ -346,7 +255,7 @@ const handleClick = (e) => {
 }
 
 .lock-icon {
-  font-size: 8px;
+  font-size: 12px;
   color: #909399;
 }
 </style> 

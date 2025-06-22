@@ -56,3 +56,6 @@
 {"timestamp":"2025-06-22T09:40:53.232Z","level":"info","message":"🚀 服务器运行在 http://localhost:3000","data":null}
 {"timestamp":"2025-06-22T09:40:53.233Z","level":"info","message":"📝 API文档: http://localhost:3000/api/health","data":null}
 {"timestamp":"2025-06-22T09:40:53.234Z","level":"info","message":"📋 日志查看: http://localhost:3000/api/logs","data":null}
+{"timestamp":"2025-06-22T09:47:45.199Z","level":"info","message":"🚀 服务器运行在 http://localhost:3000","data":null}
+{"timestamp":"2025-06-22T09:47:45.200Z","level":"info","message":"📝 API文档: http://localhost:3000/api/health","data":null}
+{"timestamp":"2025-06-22T09:47:45.201Z","level":"info","message":"📋 日志查看: http://localhost:3000/api/logs","data":null}

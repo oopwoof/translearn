@@ -108,6 +108,11 @@
     }
   }
   
+  const handleMultiDragStart = (multiDragData) => {
+    console.log('🎯 工作区接收到多选拖拽事件:', multiDragData)
+    ElMessage.info(`开始拖拽 ${multiDragData.count} 个功能球`)
+  }
+  
   const handleAnalyzeWithBalls = async (selectedBalls, onAnalysisComplete) => {
     if (!textToAnalyze.value) {
       ElMessage.warning('请先输入要分析的文本')
@@ -282,11 +287,6 @@
   const handleQualityChange = (newQuality) => {
     quality.value = newQuality
   }
-
-  const handleMultiDragStart = (multiDragData) => {
-    console.log('🎯 工作区接收到多选拖拽事件:', multiDragData)
-    ElMessage.info(`开始拖拽 ${multiDragData.count} 个功能球`)
-  }
   </script>
   
   <style scoped>
@@ -294,49 +294,7 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background: var(--bg-gradient-main);
-    overflow: hidden;
-    position: relative;
-  }
-  
-  /* 🌅 浮动几何装饰元素 */
-  .translation-workspace::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background-image: 
-      radial-gradient(circle at 20% 80%, rgba(255, 181, 167, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(254, 215, 170, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(52, 152, 219, 0.1) 0%, transparent 50%);
-    animation: float 20s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 0;
-  }
-  
-  .translation-workspace::after {
-    content: '';
-    position: absolute;
-    top: 10%;
-    right: 10%;
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(45deg, var(--sunset-coral), var(--sunset-gold));
-    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-    opacity: 0.1;
-    animation: float 15s ease-in-out infinite reverse;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* 🎯 FunctionArea 固定为页面的1/10 */
-  .translation-workspace > :deep(.function-area) {
-    height: 10vh; /* 页面的1/10 */
-    min-height: 100px; /* 最小高度确保内容可见 */
-    max-height: 140px; /* 最大高度限制 */
-    flex-shrink: 0;
+    background: #f5f7fa;
     overflow: hidden;
   }
   
@@ -348,70 +306,20 @@
     gap: 20px;
     overflow: hidden;
     min-height: 0;
-    position: relative;
-    z-index: 1;
-    height: 90vh; /* 剩余的9/10页面高度 */
   }
   
   .panel-container {
     flex: 1;
     display: grid;
-    grid-template-columns: 3fr 3fr 1fr 3fr; /* AnalysisPanel:3, ArabicPanel:3, ControlPanel:1, ChinesePanel:3 */
+    grid-template-columns: 300px 1fr 300px 1fr;
     gap: 20px;
     min-height: 0;
     overflow: hidden;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* 🎨 确保所有文本颜色清晰可见 */
-  .translation-workspace :deep(*) {
-    color: var(--vt-c-text-light-1, #2c3e50) !important;
-  }
-
-  .translation-workspace :deep(.el-input__inner) {
-    color: var(--vt-c-text-light-1, #2c3e50) !important;
-    background-color: rgba(255, 255, 255, 0.9) !important;
-  }
-
-  .translation-workspace :deep(.el-textarea__inner) {
-    color: var(--vt-c-text-light-1, #2c3e50) !important;
-    background-color: rgba(255, 255, 255, 0.9) !important;
-  }
-
-  .translation-workspace :deep(.el-button) {
-    color: white !important;
-  }
-
-  .translation-workspace :deep(.el-button--primary) {
-    background-color: var(--soft-blue, #3498db) !important;
-    border-color: var(--soft-blue, #3498db) !important;
-  }
-
-  .translation-workspace :deep(h1, h2, h3, h4, h5, h6) {
-    color: var(--deep-blue, #2c3e50) !important;
-    font-weight: 600;
-  }
-
-  .translation-workspace :deep(p, span, div) {
-    color: var(--vt-c-text-light-1, #2c3e50) !important;
-  }
-
-  .translation-workspace :deep(.feature-content),
-  .translation-workspace :deep(.suggestion-content), 
-  .translation-workspace :deep(.intent-content),
-  .translation-workspace :deep(.reference-content),
-  .translation-workspace :deep(.instruction-content) {
-    color: var(--deep-blue, #2c3e50) !important;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    margin-top: 8px;
   }
   
   @media (max-width: 1600px) {
     .panel-container {
-      grid-template-columns: 3fr 3fr 1fr 3fr; /* 在较小屏幕上保持比例 */
+      grid-template-columns: 250px 1fr 250px 1fr;
     }
   }
   
@@ -419,11 +327,6 @@
     .panel-container {
       grid-template-columns: 1fr;
       grid-template-rows: auto auto auto auto;
-    }
-    
-    .workspace-container {
-      height: auto;
-      min-height: 90vh;
     }
   }
   </style>

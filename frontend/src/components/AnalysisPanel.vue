@@ -454,24 +454,24 @@
       } else {
         // 单个功能球拖拽（原逻辑）
         const ballData = dragData
-        if (!selectedBalls.value.find(b => b.id === ballData.id)) {
-          selectedBalls.value.push({
-            id: ballData.id,
-            label: ballData.label,
-            icon: ballData.icon,
-            prompt: ballData.prompt
-          })
+      if (!selectedBalls.value.find(b => b.id === ballData.id)) {
+        selectedBalls.value.push({
+          id: ballData.id,
+          label: ballData.label,
+          icon: ballData.icon,
+          prompt: ballData.prompt
+        })
+        
+        // 检查是否有该功能球的历史分析数据
+        if (persistedAnalysisData.value[ballData.id]) {
+          // 恢复显示历史分析数据
+          const historicalData = persistedAnalysisData.value[ballData.id]
+          Object.assign(displayedAnalysisData.value, historicalData)
           
-          // 检查是否有该功能球的历史分析数据
-          if (persistedAnalysisData.value[ballData.id]) {
-            // 恢复显示历史分析数据
-            const historicalData = persistedAnalysisData.value[ballData.id]
-            Object.assign(displayedAnalysisData.value, historicalData)
-            
-            // 标记为已分析
-            analyzedBalls.value.add(ballData.id)
-            
-            ElMessage.success(`恢复了 ${ballData.label} 的历史分析结果`)
+          // 标记为已分析
+          analyzedBalls.value.add(ballData.id)
+          
+          ElMessage.success(`恢复了 ${ballData.label} 的历史分析结果`)
           } else {
             ElMessage.success(`添加了功能球: ${ballData.label}`)
           }
@@ -679,237 +679,94 @@
   
   <style scoped>
   .analysis-panel {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-backdrop);
-    -webkit-backdrop-filter: var(--glass-backdrop);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--glass-border);
+    background: white;
+    border-radius: 12px;
     padding: 20px;
-    box-shadow: var(--shadow-soft);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+    max-height: calc(100vh - 140px);
     overflow-y: auto;
-    overflow-x: hidden;
-    max-height: 100%;
-    transition: var(--transition-smooth);
-    position: relative;
-  }
-  
-  /* 🏜️ 分析面板沙漠装饰 */
-  .analysis-panel::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-      radial-gradient(circle at 15% 85%, var(--geometric-pattern) 0%, transparent 60%),
-      linear-gradient(135deg, transparent 0%, var(--sand-texture) 30%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.3;
-  }
-  
-  .analysis-panel:hover {
-    box-shadow: var(--shadow-medium);
-    border-color: var(--desert-oasis-green);
   }
   
   .analysis-panel h3 {
-    color: var(--deep-blue, #2c3e50) !important;
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 24px;
-    text-align: center;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-    position: relative;
-    z-index: 2;
-  }
-  
-  /* 🌟 标题星光簇装饰 */
-  .analysis-panel h3 {
-    position: relative;
-  }
-  
-  .analysis-panel h3::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background: var(--desert-oasis-green);
-    border-radius: 50%;
-    box-shadow: 
-      -15px -3px 0 1px var(--sky-horizon-blue),
-      15px -5px 0 0px var(--twilight-purple),
-      -10px 8px 0 1px var(--desert-sand-gold),
-      12px 6px 0 0px var(--desert-oasis-green);
-    animation: twinkle 4s ease-in-out infinite alternate;
-    z-index: 1;
-  }
-  
-  .analysis-panel h3::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 3px;
-    background: var(--bg-gradient-warm);
-    border-radius: 2px;
-    z-index: 1;
+    margin: 0 0 20px 0;
+    color: #1E3050;
+    font-size: 18px;
   }
   
   .ball-drop-zone {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(232, 216, 176, 0.1));
-    border: 2px dashed var(--sky-horizon-blue);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    margin-bottom: 20px;
-    min-height: 120px;
+    background: #f5f7fa;
+    border: 2px dashed #dcdfe6;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    min-height: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: var(--transition-smooth);
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    z-index: 1;
-  }
-  
-  .ball-drop-zone::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-      radial-gradient(circle at 20% 20%, var(--geometric-pattern) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, var(--sand-texture) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
+    transition: all 0.3s;
   }
   
   .ball-drop-zone.has-balls {
     border-style: solid;
-    border-color: var(--desert-oasis-green);
-    background: linear-gradient(135deg, var(--geometric-pattern), rgba(255, 255, 255, 0.2));
-    box-shadow: var(--shadow-soft);
+    border-color: #1E3050;
+    background: #f0f8ff;
   }
   
   .drop-hint {
-    color: var(--deep-blue, #2c3e50) !important;
-    font-size: 15px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-  }
-  
-  .drop-hint::before {
-    content: '🎯';
-    font-size: 20px;
+    color: #909399;
+    font-size: 14px;
   }
   
   .selected-balls {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    position: relative;
-    z-index: 1;
+    gap: 8px;
   }
   
   .selected-ball {
-    background: var(--bg-gradient-card);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--glass-border);
-    padding: 12px 16px;
+    background: white;
+    border-radius: 8px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     font-size: 13px;
-    color: var(--deep-blue, #2c3e50) !important;
-    box-shadow: var(--shadow-soft);
+    color: #1E3050;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     position: relative;
-    transition: var(--transition-smooth);
-    font-weight: 600;
+    transition: all 0.3s;
   }
-  
-  .selected-ball span {
-    color: var(--deep-blue, #2c3e50) !important;
-  }
-  
-  .selected-ball:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-medium);
-    border-color: rgba(255, 255, 255, 0.4);
-  }
-  
+
   .selected-ball.analyzed {
-    background: linear-gradient(135deg, rgba(46, 125, 50, 0.1), rgba(255, 255, 255, 0.3));
-    border-color: rgba(46, 125, 50, 0.3);
-    animation: success-glow 2s infinite alternate;
+    background: #f0f9ff;
+    border: 1px solid #3b82f6;
   }
-  
+
   .selected-ball.pending {
-    background: linear-gradient(135deg, rgba(254, 215, 170, 0.2), rgba(255, 255, 255, 0.3));
-    border-color: rgba(254, 215, 170, 0.5);
-    animation: pending-pulse 1.5s infinite;
+    background: #fffbeb;
+    border: 1px solid #f59e0b;
   }
-  
-  @keyframes success-glow {
-    from {
-      box-shadow: var(--shadow-soft), 0 0 0 0 rgba(46, 125, 50, 0.3);
-    }
-    to {
-      box-shadow: var(--shadow-medium), 0 0 0 4px rgba(46, 125, 50, 0.1);
-    }
-  }
-  
-  @keyframes pending-pulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-    50% {
-      transform: scale(1.02);
-      opacity: 0.9;
-    }
-  }
-  
+
   .ball-status {
     display: flex;
     align-items: center;
     margin-left: 4px;
   }
-  
+
   .status-icon {
-    font-size: 16px;
+    font-size: 14px;
   }
-  
+
   .analyzed-icon {
-    color: #2E7D32 !important;
-    animation: check-bounce 0.6s ease-out;
+    color: #10b981;
   }
-  
+
   .pending-icon {
-    color: #F57C00 !important;
-    animation: spin 2s linear infinite;
+    color: #f59e0b;
+    animation: spin 1s linear infinite;
   }
-  
-  @keyframes check-bounce {
-    0% { transform: scale(0); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
-  }
-  
+
   @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
@@ -917,13 +774,7 @@
   
   .analyze-btn {
     width: 100%;
-    margin-bottom: 24px;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .analyze-btn:hover:not(:disabled) {
-    animation: oasis-ripple 2s ease-out;
+    margin-bottom: 20px;
   }
   
   .analyze-btn.is-loading {
@@ -931,170 +782,67 @@
   }
   
   .analysis-section {
-    margin-bottom: 20px;
-    animation: slideUpFade 0.6s ease-out;
+    margin-bottom: 16px;
   }
   
   .feature-card {
-    background: linear-gradient(135deg, rgba(46, 125, 50, 0.08), rgba(255, 255, 255, 0.3));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(46, 125, 50, 0.2);
-    padding: 18px;
-    border-left: 4px solid #2E7D32;
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition-smooth);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .feature-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-    border-left-color: #4CAF50;
-  }
-  
-  .feature-card p, .feature-card strong {
-    color: var(--deep-blue, #2c3e50) !important;
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #2E7D32;
   }
   
   .terminology-card {
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.08), rgba(255, 255, 255, 0.3));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(52, 152, 219, 0.2);
-    padding: 18px;
-    border-left: 4px solid var(--soft-blue);
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition-smooth);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .terminology-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-    border-left-color: #66B1FF;
-  }
-  
-  .terminology-card p, .terminology-card strong {
-    color: var(--deep-blue, #2c3e50) !important;
-  }
-  
-  .term-analysis {
-    margin-bottom: 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
     padding: 12px;
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.05), rgba(255, 255, 255, 0.4));
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(52, 152, 219, 0.1);
-    transition: var(--transition-smooth);
+    border-left: 3px solid #1E3050;
   }
-  
-  .term-analysis:hover {
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.08), rgba(255, 255, 255, 0.5));
-    border-color: rgba(52, 152, 219, 0.2);
+
+  .term-analysis {
+    margin-bottom: 12px;
+    padding: 8px;
+    background: #f0f0f0;
+    border-radius: 6px;
   }
-  
+
   .term-title {
-    font-weight: 700;
-    color: var(--deep-blue, #2c3e50) !important;
-    margin-bottom: 6px;
-    font-size: 14px;
+    font-weight: 600;
+    color: #1E3050;
+    margin-bottom: 4px;
   }
-  
+
   .term-content {
-    color: var(--deep-blue, #2c3e50) !important;
-    line-height: 1.6;
-    font-size: 13px;
-    opacity: 0.9;
+    color: #333;
+    line-height: 1.5;
   }
   
   .suggestions-card {
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.08), rgba(255, 255, 255, 0.3));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(52, 152, 219, 0.2);
-    padding: 18px;
-    border-left: 4px solid #1976D2;
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition-smooth);
-  }
-  
-  .suggestions-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-  }
-  
-  .suggestions-card p, .suggestions-card strong {
-    color: var(--deep-blue, #2c3e50) !important;
+    background: #f0f8ff;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #1976D2;
   }
   
   .intent-card {
-    background: linear-gradient(135deg, rgba(76, 175, 80, 0.08), rgba(255, 255, 255, 0.3));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(76, 175, 80, 0.2);
-    padding: 18px;
-    border-left: 4px solid #4CAF50;
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition-smooth);
-  }
-  
-  .intent-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-  }
-  
-  .intent-card p, .intent-card strong {
-    color: var(--deep-blue, #2c3e50) !important;
+    background: #e8f5e8;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #4caf50;
   }
   
   .reference-card {
-    background: linear-gradient(135deg, rgba(156, 39, 176, 0.08), rgba(255, 255, 255, 0.3));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(156, 39, 176, 0.2);
-    padding: 18px;
-    border-left: 4px solid #9C27B0;
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition-smooth);
-  }
-  
-  .reference-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-  }
-  
-  .reference-card p, .reference-card strong {
-    color: var(--deep-blue, #2c3e50) !important;
+    background: #f3e5f5;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #9c27b0;
   }
   
   .instruction-card {
-    background: linear-gradient(135deg, rgba(0, 188, 212, 0.08), rgba(255, 255, 255, 0.3));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(0, 188, 212, 0.2);
-    padding: 18px;
-    border-left: 4px solid #00BCD4;
-    box-shadow: var(--shadow-soft);
-    transition: var(--transition-smooth);
-  }
-  
-  .instruction-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-  }
-  
-  .instruction-card p, .instruction-card strong {
-    color: var(--deep-blue, #2c3e50) !important;
+    background: #e1f5fe;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #00bcd4;
   }
   
   .feature-content,
@@ -1102,203 +850,88 @@
   .intent-content,
   .reference-content,
   .instruction-content {
-    color: var(--deep-blue, #2c3e50) !important;
-    margin: 12px 0 0 0;
-    line-height: 1.6;
-    font-size: 14px;
-    opacity: 0.9;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 8px 12px;
-    border-radius: var(--radius-md);
-    font-weight: 500;
+    color: #333;
+    margin: 8px 0 0 0;
+    line-height: 1.5;
   }
   
   .timestamp {
-    color: rgba(44, 62, 80, 0.6) !important;
-    font-size: 12px;
-    margin: 12px 0 0 0;
-    font-style: italic;
+    color: #666;
+    font-size: 0.9rem;
+    margin: 8px 0 0 0;
   }
   
   .empty-state {
     text-align: center;
-    color: var(--deep-blue, #2c3e50) !important;
-    padding: 60px 20px;
-    font-size: 15px;
-    position: relative;
-  }
-  
-  .empty-state::before {
-    content: '📋';
-    display: block;
-    font-size: 48px;
-    margin-bottom: 16px;
-    opacity: 0.6;
+    color: #999;
+    padding: 40px 20px;
   }
   
   .remove-ball {
-    font-size: 16px;
-    color: rgba(44, 62, 80, 0.5) !important;
+    font-size: 14px;
+    color: #909399;
     cursor: pointer;
-    margin-left: 6px;
-    transition: var(--transition-smooth);
-    border-radius: var(--radius-round);
-    padding: 2px;
+    margin-left: 4px;
+    transition: all 0.3s;
   }
   
   .remove-ball:hover {
-    color: #F56C6C !important;
-    transform: scale(1.2);
-    background: rgba(245, 108, 108, 0.1);
+    color: #F56C6C;
+    transform: scale(1.1);
   }
-  
+
   .group-settings {
-    margin-bottom: 24px;
-    padding: 16px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--glass-border);
+    margin-bottom: 20px;
   }
-  
+
   .group-switch {
-    margin-right: 12px;
+    margin-right: 10px;
   }
-  
+
   .group-size-selector {
-    margin-top: 12px;
+    margin-top: 10px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
-  
+
   .group-size-label {
     font-size: 14px;
-    color: var(--deep-blue, #2c3e50) !important;
-    font-weight: 600;
+    color: #606266;
+    font-weight: 500;
   }
-  
+
   .analysis-progress {
-    margin-bottom: 24px;
-    padding: 20px;
-    background: linear-gradient(135deg, rgba(46, 125, 50, 0.05), rgba(255, 255, 255, 0.3));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(46, 125, 50, 0.2);
-    box-shadow: var(--shadow-soft);
-    animation: progress-glow 3s infinite alternate;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
   }
-  
-  @keyframes progress-glow {
-    from {
-      box-shadow: var(--shadow-soft);
-    }
-    to {
-      box-shadow: var(--shadow-medium), 0 0 0 2px rgba(46, 125, 50, 0.1);
-    }
-  }
-  
+
   .progress-info {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     font-size: 14px;
-    color: var(--deep-blue, #2c3e50) !important;
-    font-weight: 600;
+    color: #64748b;
+    font-weight: 500;
   }
-  
+
   .progress-bar {
     width: 100%;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
-  
+
   .current-group {
-    margin-top: 12px;
+    margin-top: 10px;
   }
-  
+
   .current-group-label {
-    font-weight: 700;
-    margin-right: 12px;
-    color: var(--deep-blue, #2c3e50) !important;
+    font-weight: 600;
+    margin-right: 10px;
   }
-  
+
   .current-ball-tag {
-    margin-left: 6px;
-  }
-  
-  /* 玻璃卡片装饰元素 */
-  .feature-card::before,
-  .terminology-card::before,
-  .suggestions-card::before,
-  .intent-card::before,
-  .reference-card::before,
-  .instruction-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 40px;
-    height: 40px;
-    background: 
-      radial-gradient(circle at 50% 50%, transparent 30%, currentColor 31%, currentColor 32%, transparent 33%);
-    opacity: 0.05;
-    pointer-events: none;
-  }
-  
-  /* 响应式设计 */
-  @media (max-width: 768px) {
-    .analysis-panel {
-      padding: 16px;
-      border-radius: var(--radius-md);
-    }
-    
-    .analysis-panel h3 {
-      font-size: 18px;
-      margin-bottom: 16px;
-    }
-    
-    .ball-drop-zone {
-      padding: 16px;
-      min-height: 100px;
-    }
-    
-    .selected-balls {
-      gap: 8px;
-    }
-    
-    .selected-ball {
-      padding: 8px 12px;
-      font-size: 12px;
-    }
-    
-    .feature-card,
-    .terminology-card,
-    .suggestions-card,
-    .intent-card,
-    .reference-card,
-    .instruction-card {
-      padding: 14px;
-    }
-  }
-  
-  /* 自定义滚动条 */
-  .analysis-panel::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .analysis-panel::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-  }
-  
-  .analysis-panel::-webkit-scrollbar-thumb {
-    background: var(--soft-blue, #3498db);
-    border-radius: 3px;
-    transition: var(--transition-smooth);
-  }
-  
-  .analysis-panel::-webkit-scrollbar-thumb:hover {
-    background: var(--deep-blue, #2c3e50);
+    margin-left: 5px;
   }
   </style>
 
