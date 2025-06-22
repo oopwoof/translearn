@@ -115,9 +115,26 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    background: linear-gradient(135deg, var(--desert-oasis-green), var(--desert-sand-gold));
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     z-index: 1;
+  }
+
+  /* 🏜️ 中文面板沙漠装饰 */
+  .chinese-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 75% 25%, var(--geometric-pattern) 0%, transparent 50%),
+      linear-gradient(-45deg, transparent 0%, var(--sand-texture) 30%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.2;
+    border-radius: var(--radius-lg);
   }
   
   .panel-header {
@@ -160,8 +177,25 @@
   }
   
   .panel-header h4::before {
-    content: '🇨🇳';
+    content: '🌱';
     font-size: 20px;
+  }
+
+  /* 🌟 中文面板标题绿洲装饰 */
+  .panel-header h4::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 3px;
+    background: var(--desert-oasis-green);
+    border-radius: 50%;
+    box-shadow: 
+      5px -2px 0 0px var(--desert-sand-gold),
+      -3px 3px 0 1px var(--sky-horizon-blue);
+    animation: twinkle 3s ease-in-out infinite alternate;
   }
   
   .panel-actions {
@@ -218,13 +252,13 @@
   }
   
   .chinese-input :deep(.el-textarea__inner:hover) {
-    border-color: rgba(76, 175, 80, 0.3);
+    border-color: var(--desert-oasis-green);
     box-shadow: var(--shadow-medium);
   }
   
   .chinese-input :deep(.el-textarea__inner:focus) {
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    border-color: var(--desert-oasis-green);
+    box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.2);
     outline: none;
   }
   

@@ -20,25 +20,45 @@
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
-  /* 🌅 温暖日落色系美学方案 */
-  --sunset-orange: #FFF5E6;      /* 淡橙色 */
-  --sunset-pink: #FFE5F1;        /* 淡粉色 */
-  --sunset-coral: #FFB5A7;       /* 珊瑚色 */
-  --sunset-gold: #FED7AA;        /* 金色 */
-  --deep-blue: #2C3E50;          /* 深蓝色 */
-  --soft-blue: #3498DB;          /* 柔和蓝 */
+  /* 🌅 沙漠绿洲色系美学方案 */
+  --desert-oasis-green: #228B22;    /* 绿洲绿 - 主色 */
+  --sky-horizon-blue: #4682B4;      /* 天穹蓝 - 辅助色 */
+  --twilight-purple: #C3B1E1;       /* 暮色紫 - 强调色 */
+  --desert-sand-gold: #E8D8B0;      /* 沙漠金 - 中性色 */
+  
+  /* 🎨 融合后的调色板 - 保持温暖感的同时引入沙漠元素 */
+  --sunset-orange: #FFF5E6;         /* 保持淡橙色 */
+  --sunset-pink: #FFE5F1;           /* 保持淡粉色 */
+  --sunset-coral: #E8A87C;          /* 调整为更偏沙漠的珊瑚色 */
+  --sunset-gold: #E8D8B0;           /* 更新为沙漠金色调 */
+  --deep-blue: #2C3E50;             /* 保持深蓝色 */
+  --soft-blue: #4682B4;             /* 更新为天穹蓝 */
   --warm-white: rgba(255, 255, 255, 0.9);
   --glass-white: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(255, 255, 255, 0.3);
   
-  /* 渐变背景 */
-  --bg-gradient-main: linear-gradient(135deg, var(--sunset-orange) 0%, var(--sunset-pink) 100%);
-  --bg-gradient-warm: linear-gradient(145deg, var(--sunset-coral) 0%, var(--sunset-gold) 100%);
-  --bg-gradient-card: linear-gradient(145deg, var(--glass-white), var(--warm-white));
+  /* 🏜️ 沙漠绿洲渐变背景 */
+  --bg-gradient-main: linear-gradient(135deg, 
+    var(--sunset-orange) 0%, 
+    var(--desert-sand-gold) 50%, 
+    var(--twilight-purple) 100%);
+  --bg-gradient-warm: linear-gradient(145deg, 
+    var(--desert-oasis-green) 0%, 
+    var(--sky-horizon-blue) 100%);
+  --bg-gradient-card: linear-gradient(145deg, 
+    var(--glass-white), 
+    rgba(232, 216, 176, 0.1));  /* 融入沙漠金调 */
+  
+  /* 🌟 时间响应色彩变量 */
+  --time-primary: var(--desert-oasis-green);    /* 默认主色 */
+  --time-accent: var(--sky-horizon-blue);       /* 默认强调色 */
+  
+  /* 🎭 几何装饰色彩 */
+  --geometric-pattern: rgba(34, 139, 34, 0.1);  /* 绿洲绿半透明 */
+  --sand-texture: rgba(232, 216, 176, 0.2);     /* 沙漠纹理 */
   
   /* 玻璃拟态效果 */
   --glass-bg: rgba(255, 255, 255, 0.25);
-  --glass-border: rgba(255, 255, 255, 0.18);
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   --glass-backdrop: blur(8px);
   
@@ -351,4 +371,129 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 700;
+}
+
+/* 🌅 时间响应色彩系统 */
+@media (prefers-color-scheme: light) {
+  /* 晨曦时光 (6:00-12:00) */
+  :root[data-time="morning"] {
+    --time-primary: var(--desert-oasis-green);
+    --time-accent: var(--sky-horizon-blue);
+    --bg-gradient-main: linear-gradient(135deg, 
+      var(--sunset-orange) 0%, 
+      var(--desert-sand-gold) 100%);
+  }
+  
+  /* 午后时光 (12:00-18:00) */
+  :root[data-time="afternoon"] {
+    --time-primary: var(--sky-horizon-blue);
+    --time-accent: var(--desert-oasis-green);
+    --bg-gradient-main: linear-gradient(135deg, 
+      var(--sky-horizon-blue) 0%, 
+      var(--desert-sand-gold) 100%);
+  }
+  
+  /* 暮色时光 (18:00-24:00, 0:00-6:00) */
+  :root[data-time="evening"] {
+    --time-primary: var(--twilight-purple);
+    --time-accent: var(--desert-sand-gold);
+    --bg-gradient-main: linear-gradient(135deg, 
+      var(--twilight-purple) 0%, 
+      var(--sunset-pink) 50%,
+      var(--desert-sand-gold) 100%);
+  }
+}
+
+/* 🏜️ 沙漠几何装饰基础样式 */
+.desert-texture {
+  position: relative;
+  overflow: hidden;
+}
+
+.desert-texture::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, var(--geometric-pattern) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, var(--sand-texture) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 🌊 沙丘流动动画 */
+@keyframes dune-flow {
+  0% { 
+    background-position: 0% 0%;
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% { 
+    background-position: 100% 100%;
+    opacity: 0.3;
+  }
+}
+
+.dune-animation {
+  background: linear-gradient(45deg, 
+    transparent 0%, 
+    var(--sand-texture) 25%, 
+    transparent 50%, 
+    var(--geometric-pattern) 75%, 
+    transparent 100%);
+  background-size: 200% 200%;
+  animation: dune-flow 20s ease-in-out infinite;
+}
+
+/* 🌟 绿洲涟漪效果 */
+@keyframes oasis-ripple {
+  0% {
+    box-shadow: 0 0 0 0 var(--desert-oasis-green);
+    opacity: 1;
+  }
+  70% {
+    box-shadow: 0 0 0 20px transparent;
+    opacity: 0.3;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    opacity: 0;
+  }
+}
+
+.oasis-pulse {
+  animation: oasis-ripple 3s infinite;
+}
+
+/* 📐 几何星光簇效果 */
+.star-cluster {
+  position: relative;
+}
+
+.star-cluster::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--sky-horizon-blue);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 
+    -10px -5px 0 1px var(--desert-oasis-green),
+    10px -8px 0 0px var(--twilight-purple),
+    -8px 8px 0 1px var(--desert-sand-gold),
+    12px 5px 0 0px var(--sky-horizon-blue);
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(0.8); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
 }

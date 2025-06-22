@@ -255,6 +255,23 @@
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     z-index: 1;
   }
+
+  /* 🏜️ 控制面板沙漠装饰 */
+  .translation-controls::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 50% 50%, var(--geometric-pattern) 0%, transparent 60%),
+      linear-gradient(90deg, transparent 0%, var(--sand-texture) 50%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.3;
+    border-radius: var(--radius-lg);
+  }
   
   .control-group {
     margin-bottom: 24px;
@@ -308,8 +325,8 @@
   }
   
   .control-input :deep(.el-input__wrapper.is-focus) {
-    border-color: var(--soft-blue);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    border-color: var(--desert-oasis-green);
+    box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.2);
   }
   
   .control-input :deep(.el-input__inner) {
@@ -344,8 +361,8 @@
   }
   
   .control-input :deep(.el-textarea__inner:focus) {
-    border-color: var(--soft-blue);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    border-color: var(--desert-oasis-green);
+    box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.2);
     outline: none;
   }
   
@@ -387,8 +404,8 @@
     right: 0;
     bottom: 0;
     background: 
-      radial-gradient(circle at 30% 30%, rgba(52, 152, 219, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 70% 70%, rgba(255, 181, 167, 0.05) 0%, transparent 50%);
+      radial-gradient(circle at 30% 30%, var(--geometric-pattern) 0%, transparent 50%),
+      radial-gradient(circle at 70% 70%, var(--sand-texture) 0%, transparent 50%);
     opacity: 0;
     transition: var(--transition-smooth);
     border-radius: inherit;
@@ -406,10 +423,10 @@
   
   .mode-button.active {
     background: var(--bg-gradient-warm);
-    border-color: var(--sunset-coral);
+    border-color: var(--desert-oasis-green);
     color: white;
-    box-shadow: var(--shadow-medium), 0 0 20px rgba(255, 181, 167, 0.4);
-    animation: pulse-glow 2s infinite;
+    box-shadow: var(--shadow-medium), 0 0 20px rgba(34, 139, 34, 0.4);
+    animation: oasis-pulse 2s infinite;
   }
   
   .mode-button.active::before {

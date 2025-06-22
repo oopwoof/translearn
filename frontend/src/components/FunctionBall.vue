@@ -158,9 +158,32 @@ const handleClick = (e) => {
   flex-shrink: 0;
 }
 
+/* 🏜️ 功能球沙漠装饰 */
+.function-ball::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background: 
+    radial-gradient(circle at 30% 30%, var(--sand-texture) 0%, transparent 70%),
+    radial-gradient(circle at 70% 70%, var(--geometric-pattern) 0%, transparent 70%);
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .function-ball:hover:not(.is-disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--sky-horizon-blue);
+}
+
+.function-ball:hover:not(.is-disabled)::before {
+  opacity: 0.4;
+  animation: oasis-ripple 2s ease-out;
 }
 
 .function-ball.is-dragging {
@@ -181,31 +204,40 @@ const handleClick = (e) => {
 }
 
 .function-ball.is-selected {
-  border-color: #409EFF;
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+  border-color: var(--desert-oasis-green);
+  box-shadow: 
+    0 2px 8px rgba(34, 139, 34, 0.3),
+    0 0 0 4px rgba(34, 139, 34, 0.1);
+  background: radial-gradient(circle at center, rgba(34, 139, 34, 0.05) 0%, white 70%);
 }
 
 .function-ball.is-selected:hover {
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
+  box-shadow: 
+    0 4px 12px rgba(34, 139, 34, 0.4),
+    0 0 0 6px rgba(34, 139, 34, 0.15);
+  animation: oasis-pulse 2s infinite;
 }
 
 .function-ball.is-confirmed {
-  border-color: #FFD700;
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
-  background: linear-gradient(135deg, #FFF8DC 0%, white 100%);
+  border-color: var(--desert-sand-gold);
+  box-shadow: 0 2px 8px rgba(232, 216, 176, 0.4);
+  background: linear-gradient(135deg, 
+    rgba(232, 216, 176, 0.1) 0%, 
+    white 50%, 
+    rgba(199, 177, 225, 0.1) 100%);
 }
 
 .function-ball.is-confirmed:hover {
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.6);
+  box-shadow: 0 4px 12px rgba(232, 216, 176, 0.6);
   transform: translateY(-2px);
 }
 
 .function-ball.is-confirmed .ball-icon {
-  color: #B8860B;
+  color: var(--desert-sand-gold);
 }
 
 .function-ball.is-confirmed .ball-label {
-  color: #B8860B;
+  color: var(--desert-sand-gold);
   font-weight: 600;
 }
 
@@ -220,8 +252,10 @@ const handleClick = (e) => {
 
 .ball-icon {
   font-size: 20px;
-  color: #1E3050;
+  color: var(--sky-horizon-blue);
   transition: color 0.3s;
+  z-index: 2;
+  position: relative;
 }
 
 .function-ball.is-disabled .ball-icon {
@@ -229,12 +263,12 @@ const handleClick = (e) => {
 }
 
 .function-ball.is-selected .ball-icon {
-  color: #409EFF;
+  color: var(--desert-oasis-green);
 }
 
 .ball-label {
   font-size: 9px;
-  color: #1E3050;
+  color: var(--deep-blue);
   text-align: center;
   font-weight: 500;
   max-width: 50px;
@@ -243,6 +277,8 @@ const handleClick = (e) => {
   white-space: nowrap;
   transition: color 0.3s;
   line-height: 1.1;
+  z-index: 2;
+  position: relative;
 }
 
 .function-ball.is-disabled .ball-label {
@@ -250,7 +286,7 @@ const handleClick = (e) => {
 }
 
 .function-ball.is-selected .ball-label {
-  color: #409EFF;
+  color: var(--desert-oasis-green);
   font-weight: 600;
 }
 
@@ -260,13 +296,14 @@ const handleClick = (e) => {
   right: -2px;
   width: 16px;
   height: 16px;
-  background: #409EFF;
+  background: var(--desert-oasis-green);
   border: 2px solid white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 3;
+  animation: twinkle 2s ease-in-out infinite alternate;
 }
 
 .check-icon {

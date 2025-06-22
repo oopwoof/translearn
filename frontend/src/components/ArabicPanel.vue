@@ -116,9 +116,26 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(135deg, var(--soft-blue), #66B1FF);
+    background: linear-gradient(135deg, var(--sky-horizon-blue), var(--twilight-purple));
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     z-index: 1;
+  }
+
+  /* 🏜️ 阿拉伯面板沙漠装饰 */
+  .arabic-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 25% 75%, var(--geometric-pattern) 0%, transparent 50%),
+      linear-gradient(45deg, transparent 0%, var(--sand-texture) 30%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.2;
+    border-radius: var(--radius-lg);
   }
   
   .panel-header {
@@ -161,8 +178,25 @@
   }
   
   .panel-header h4::before {
-    content: '🇸🇦';
+    content: '🌙';
     font-size: 20px;
+  }
+
+  /* 🌟 阿拉伯面板标题星光装饰 */
+  .panel-header h4::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 3px;
+    background: var(--sky-horizon-blue);
+    border-radius: 50%;
+    box-shadow: 
+      5px -2px 0 0px var(--twilight-purple),
+      -3px 3px 0 1px var(--desert-sand-gold);
+    animation: twinkle 3s ease-in-out infinite alternate;
   }
   
   .panel-actions {
@@ -221,13 +255,13 @@
   }
   
   .arabic-input :deep(.el-textarea__inner:hover) {
-    border-color: rgba(52, 152, 219, 0.3);
+    border-color: var(--sky-horizon-blue);
     box-shadow: var(--shadow-medium);
   }
   
   .arabic-input :deep(.el-textarea__inner:focus) {
-    border-color: var(--soft-blue);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    border-color: var(--sky-horizon-blue);
+    box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.2);
     outline: none;
   }
   

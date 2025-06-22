@@ -380,7 +380,7 @@ const handleBallClick = (ball) => {
   padding: 8px 16px; /* 进一步减少内边距 */
   transition: var(--transition-smooth);
   flex-shrink: 0;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 2px solid var(--desert-oasis-green);
   position: relative;
   z-index: 2;
   height: 100%; /* 使用父级设置的高度 */
@@ -389,6 +389,7 @@ const handleBallClick = (ball) => {
   overflow: hidden;
 }
 
+/* 🌟 功能区星空装饰 */
 .function-area::before {
   content: '';
   position: absolute;
@@ -398,6 +399,32 @@ const handleBallClick = (ball) => {
   height: 3px;
   background: var(--bg-gradient-warm);
   z-index: 1;
+}
+
+.function-area::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(1px 1px at 20% 30%, var(--sky-horizon-blue), transparent),
+    radial-gradient(1px 1px at 40% 70%, var(--twilight-purple), transparent),
+    radial-gradient(1px 1px at 60% 20%, var(--desert-oasis-green), transparent),
+    radial-gradient(2px 2px at 80% 80%, var(--desert-sand-gold), transparent),
+    radial-gradient(1px 1px at 90% 40%, var(--sky-horizon-blue), transparent);
+  background-repeat: repeat;
+  background-size: 200px 150px;
+  animation: star-field 40s linear infinite;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes star-field {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
 }
 
 .function-container {
@@ -417,13 +444,10 @@ const handleBallClick = (ball) => {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  z-index: 1;
 }
 
-.function-container:hover {
-  transform: translateY(-1px); /* 减少悬浮效果以适应小空间 */
-  box-shadow: var(--glass-shadow), var(--shadow-medium);
-}
-
+/* 🏜️ 功能容器沙漠纹理 */
 .function-container::before {
   content: '';
   position: absolute;
@@ -432,10 +456,17 @@ const handleBallClick = (ball) => {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 80%, rgba(52, 152, 219, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255, 181, 167, 0.05) 0%, transparent 50%);
+    linear-gradient(45deg, transparent 0%, var(--sand-texture) 25%, transparent 50%),
+    radial-gradient(circle at 70% 30%, var(--geometric-pattern) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
+  opacity: 0.4;
+}
+
+.function-container:hover {
+  transform: translateY(-1px); /* 减少悬浮效果以适应小空间 */
+  box-shadow: var(--glass-shadow), var(--shadow-medium);
+  border-color: var(--desert-oasis-green);
 }
 
 .function-grid {
@@ -479,7 +510,7 @@ const handleBallClick = (ball) => {
   box-shadow: var(--glass-shadow);
   transition: var(--transition-smooth);
   z-index: 3;
-  border: 2px solid var(--glass-border);
+  border: 2px solid var(--desert-oasis-green);
   backdrop-filter: var(--glass-backdrop);
   -webkit-backdrop-filter: var(--glass-backdrop);
 }
@@ -488,6 +519,7 @@ const handleBallClick = (ball) => {
   transform: translateX(-50%) translateY(-2px) scale(1.1);
   box-shadow: var(--glass-shadow), var(--shadow-glow);
   filter: brightness(1.1);
+  animation: oasis-pulse 1s ease-out;
 }
 
 .expand-button .el-icon {

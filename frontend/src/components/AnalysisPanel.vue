@@ -693,9 +693,25 @@
     position: relative;
   }
   
+  /* 🏜️ 分析面板沙漠装饰 */
+  .analysis-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 15% 85%, var(--geometric-pattern) 0%, transparent 60%),
+      linear-gradient(135deg, transparent 0%, var(--sand-texture) 30%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.3;
+  }
+  
   .analysis-panel:hover {
     box-shadow: var(--shadow-medium);
-    border-color: rgba(255, 255, 255, 0.4);
+    border-color: var(--desert-oasis-green);
   }
   
   .analysis-panel h3 {
@@ -706,6 +722,31 @@
     text-align: center;
     text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
     position: relative;
+    z-index: 2;
+  }
+  
+  /* 🌟 标题星光簇装饰 */
+  .analysis-panel h3 {
+    position: relative;
+  }
+  
+  .analysis-panel h3::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: var(--desert-oasis-green);
+    border-radius: 50%;
+    box-shadow: 
+      -15px -3px 0 1px var(--sky-horizon-blue),
+      15px -5px 0 0px var(--twilight-purple),
+      -10px 8px 0 1px var(--desert-sand-gold),
+      12px 6px 0 0px var(--desert-oasis-green);
+    animation: twinkle 4s ease-in-out infinite alternate;
+    z-index: 1;
   }
   
   .analysis-panel h3::after {
@@ -718,11 +759,12 @@
     height: 3px;
     background: var(--bg-gradient-warm);
     border-radius: 2px;
+    z-index: 1;
   }
   
   .ball-drop-zone {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-    border: 2px dashed rgba(52, 152, 219, 0.3);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(232, 216, 176, 0.1));
+    border: 2px dashed var(--sky-horizon-blue);
     border-radius: var(--radius-lg);
     padding: 20px;
     margin-bottom: 20px;
@@ -735,6 +777,7 @@
     overflow: hidden;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+    z-index: 1;
   }
   
   .ball-drop-zone::before {
@@ -745,15 +788,16 @@
     right: 0;
     bottom: 0;
     background: 
-      radial-gradient(circle at 20% 20%, rgba(52, 152, 219, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(255, 181, 167, 0.05) 0%, transparent 50%);
+      radial-gradient(circle at 20% 20%, var(--geometric-pattern) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, var(--sand-texture) 0%, transparent 50%);
     pointer-events: none;
+    z-index: 0;
   }
   
   .ball-drop-zone.has-balls {
     border-style: solid;
-    border-color: var(--soft-blue);
-    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(255, 255, 255, 0.2));
+    border-color: var(--desert-oasis-green);
+    background: linear-gradient(135deg, var(--geometric-pattern), rgba(255, 255, 255, 0.2));
     box-shadow: var(--shadow-soft);
   }
   
@@ -874,6 +918,12 @@
   .analyze-btn {
     width: 100%;
     margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .analyze-btn:hover:not(:disabled) {
+    animation: oasis-ripple 2s ease-out;
   }
   
   .analyze-btn.is-loading {
