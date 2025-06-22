@@ -208,41 +208,52 @@
   <style scoped>
   .translation-controls {
     background: white;
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 8px;
+    padding: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     height: fit-content;
     max-height: calc(100vh - 140px);
     overflow-y: auto;
+    font-size: 12px;
   }
   
   .control-group {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
   }
   
   .control-label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     font-weight: 500;
     color: #1E3050;
-    font-size: 14px;
+    font-size: 11px;
   }
   
   .control-input {
     width: 100%;
   }
   
+  .control-input :deep(.el-input__inner) {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+  
+  .control-input :deep(.el-textarea__inner) {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+  
   .mode-buttons {
     display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-top: 24px;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
   }
   
   .mode-button {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+    width: 100%;
+    height: 36px;
+    border-radius: 8px;
     background: #f5f7fa;
     border: 2px solid #dcdfe6;
     display: flex;
@@ -265,28 +276,29 @@
   }
   
   .mode-button.expanded {
-    width: 200px;
+    width: 100%;
     height: auto;
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: 8px;
+    padding: 8px;
   }
   
   .mode-label {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
   }
   
   .expanded-controls {
-    margin-top: 12px;
+    margin-top: 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
   }
   
   .quality-selector {
     display: flex;
-    border-radius: 8px;
+    flex-direction: column;
+    border-radius: 6px;
     overflow: hidden;
     border: 1px solid #dcdfe6;
     background: #f5f7fa;
@@ -294,19 +306,19 @@
   
   .quality-option {
     flex: 1;
-    padding: 8px 12px;
+    padding: 6px 8px;
     text-align: center;
     cursor: pointer;
     background: white;
-    border-right: 1px solid #dcdfe6;
+    border-bottom: 1px solid #dcdfe6;
     transition: all 0.3s ease;
-    font-size: 14px;
+    font-size: 11px;
     font-weight: 500;
     position: relative;
   }
   
   .quality-option:last-child {
-    border-right: none;
+    border-bottom: none;
   }
   
   .quality-option:hover {
@@ -326,13 +338,19 @@
   .quality-option.active::after {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 20px;
-    height: 2px;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
     background: white;
-    border-radius: 1px;
+    border-radius: 50%;
+  }
+  
+  .expanded-controls :deep(.el-button) {
+    font-size: 11px;
+    padding: 6px 12px;
+    height: auto;
   }
   </style>
   

@@ -296,14 +296,21 @@
     height: 100vh;
     background: #f5f7fa;
     overflow: hidden;
+    font-size: 14px; /* 基础字体大小调整 */
+  }
+  
+  /* FunctionArea 占1/10高度 */
+  .translation-workspace > :first-child {
+    height: 10vh;
+    flex-shrink: 0;
   }
   
   .workspace-container {
-    flex: 1;
+    height: 90vh; /* 占9/10高度 */
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    gap: 20px;
+    padding: 15px; /* 减小内边距 */
+    gap: 15px; /* 减小间距 */
     overflow: hidden;
     min-height: 0;
   }
@@ -311,15 +318,35 @@
   .panel-container {
     flex: 1;
     display: grid;
-    grid-template-columns: 300px 1fr 300px 1fr;
-    gap: 20px;
+    grid-template-columns: 3fr 3fr 1fr 3fr; /* 按要求的比例：3/10、3/10、1/10、3/10 */
+    gap: 15px; /* 减小间距 */
     min-height: 0;
     overflow: hidden;
   }
   
+  /* 调整各个面板的字体大小 */
+  .panel-container > * {
+    font-size: 13px;
+  }
+  
+  /* 针对控制面板的特殊处理，因为它空间较小 */
+  .panel-container > :nth-child(3) {
+    font-size: 12px;
+  }
+  
   @media (max-width: 1600px) {
     .panel-container {
-      grid-template-columns: 250px 1fr 250px 1fr;
+      grid-template-columns: 3fr 3fr 1fr 3fr; /* 保持同样的比例 */
+      gap: 12px;
+    }
+    
+    .workspace-container {
+      padding: 12px;
+      gap: 12px;
+    }
+    
+    .translation-workspace {
+      font-size: 13px;
     }
   }
   
@@ -327,6 +354,25 @@
     .panel-container {
       grid-template-columns: 1fr;
       grid-template-rows: auto auto auto auto;
+      gap: 10px;
+    }
+    
+    .workspace-container {
+      padding: 10px;
+      gap: 10px;
+    }
+    
+    .translation-workspace {
+      font-size: 12px;
+    }
+    
+    /* 移动端时调整FunctionArea高度 */
+    .translation-workspace > :first-child {
+      height: 12vh;
+    }
+    
+    .workspace-container {
+      height: 88vh;
     }
   }
   </style>

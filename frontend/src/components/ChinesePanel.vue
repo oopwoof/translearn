@@ -102,7 +102,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
+    padding: 12px 16px;
     border-bottom: 1px solid #e4e7ed;
     flex-shrink: 0;
   }
@@ -110,17 +110,17 @@
   .panel-header h4 {
     margin: 0;
     color: #1E3050;
-    font-size: 16px;
+    font-size: 14px;
   }
   
   .panel-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
   }
   
   .text-area {
     flex: 1;
-    padding: 20px;
+    padding: 15px;
     position: relative;
     min-height: 0;
     overflow: hidden;
@@ -133,10 +133,10 @@
   .chinese-input :deep(.el-textarea__inner) {
     height: 100% !important;
     resize: none;
-    font-size: 16px;
-    line-height: 1.6;
-    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-    padding: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    font-family: 'Microsoft YaHei', sans-serif;
+    padding: 10px;
   }
   
   .loading-overlay {
@@ -147,12 +147,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     color: #1E3050;
+    font-size: 12px;
   }
   
   .loading-icon {
-    font-size: 24px;
+    font-size: 20px;
     animation: spin 1s linear infinite;
   }
   
@@ -162,7 +163,7 @@
   }
   
   .panel-footer {
-    padding: 12px 20px;
+    padding: 10px 16px;
     border-top: 1px solid #e4e7ed;
     background: #f5f7fa;
     border-radius: 0 0 12px 12px;
@@ -171,7 +172,11 @@
   
   .char-count {
     color: #666;
-    font-size: 14px;
+    font-size: 12px;
+  }
+  
+  .panel-actions :deep(.el-button) {
+    font-size: 11px;
   }
   </style>
 

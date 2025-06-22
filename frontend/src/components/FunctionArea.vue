@@ -374,18 +374,22 @@ const handleBallClick = (ball) => {
 <style scoped>
 .function-area {
   background: #f5f7fa;
-  padding: 12px 20px;
+  padding: 8px 15px;
   transition: all 0.3s;
   flex-shrink: 0;
   border-bottom: 1px solid #e4e7ed;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .function-container {
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   background: white;
-  border-radius: 12px;
-  padding: 12px 20px;
+  border-radius: 8px;
+  padding: 8px 15px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   position: relative;
   transition: all 0.3s;
@@ -394,21 +398,25 @@ const handleBallClick = (ball) => {
 .function-grid {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  padding: 4px;
+  gap: 12px;
+  padding: 2px;
   transition: all 0.3s;
   flex-wrap: wrap;
   position: relative;
   user-select: none;
 }
 
+.function-grid.selecting {
+  cursor: crosshair;
+}
+
 .expand-button {
   position: absolute;
-  bottom: -16px;
+  bottom: -12px;
   left: 50%;
   transform: translateX(-50%);
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   background: white;
   border-radius: 50%;
   display: flex;
@@ -425,7 +433,7 @@ const handleBallClick = (ball) => {
 }
 
 .expand-button .el-icon {
-  font-size: 16px;
+  font-size: 12px;
   color: #1E3050;
   transition: transform 0.3s;
 }
@@ -435,11 +443,11 @@ const handleBallClick = (ball) => {
 }
 
 .function-area.expanded .function-container {
-  padding-bottom: 32px;
+  padding-bottom: 24px;
 }
 
 .function-area:not(.expanded) .function-grid {
-  max-height: 80px;
+  max-height: 60px;
   overflow: hidden;
 }
 
@@ -462,10 +470,6 @@ const handleBallClick = (ball) => {
     border-color: #66B1FF;
     background: rgba(64, 158, 255, 0.15);
   }
-}
-
-.function-grid.selecting {
-  cursor: crosshair;
 }
 
 /* 为选中的功能球添加特殊样式 */

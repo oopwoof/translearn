@@ -681,26 +681,27 @@
   .analysis-panel {
     background: white;
     border-radius: 12px;
-    padding: 20px;
+    padding: 15px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     height: fit-content;
     max-height: calc(100vh - 140px);
     overflow-y: auto;
+    font-size: 13px;
   }
   
   .analysis-panel h3 {
-    margin: 0 0 20px 0;
+    margin: 0 0 15px 0;
     color: #1E3050;
-    font-size: 18px;
+    font-size: 16px;
   }
   
   .ball-drop-zone {
     background: #f5f7fa;
     border: 2px dashed #dcdfe6;
     border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-    min-height: 100px;
+    padding: 12px;
+    margin-bottom: 12px;
+    min-height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -715,23 +716,23 @@
   
   .drop-hint {
     color: #909399;
-    font-size: 14px;
+    font-size: 12px;
   }
   
   .selected-balls {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
   }
   
   .selected-ball {
     background: white;
-    border-radius: 8px;
-    padding: 8px 12px;
+    border-radius: 6px;
+    padding: 6px 8px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 13px;
+    gap: 4px;
+    font-size: 11px;
     color: #1E3050;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     position: relative;
@@ -751,11 +752,11 @@
   .ball-status {
     display: flex;
     align-items: center;
-    margin-left: 4px;
+    margin-left: 2px;
   }
 
   .status-icon {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .analyzed-icon {
@@ -774,7 +775,7 @@
   
   .analyze-btn {
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
   }
   
   .analyze-btn.is-loading {
@@ -782,96 +783,94 @@
   }
   
   .analysis-section {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
   
-  .feature-card {
+  .feature-card,
+  .terminology-card,
+  .suggestions-card,
+  .intent-card,
+  .reference-card,
+  .instruction-card {
     background: #f9f9f9;
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 6px;
+    padding: 10px;
     border-left: 3px solid #2E7D32;
   }
-  
+
   .terminology-card {
-    background: #f9f9f9;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #1E3050;
+    border-left-color: #1E3050;
+  }
+
+  .suggestions-card {
+    background: #f0f8ff;
+    border-left-color: #1976D2;
+  }
+
+  .intent-card {
+    background: #e8f5e8;
+    border-left-color: #4caf50;
+  }
+
+  .reference-card {
+    background: #f3e5f5;
+    border-left-color: #9c27b0;
+  }
+
+  .instruction-card {
+    background: #e1f5fe;
+    border-left-color: #00bcd4;
   }
 
   .term-analysis {
-    margin-bottom: 12px;
-    padding: 8px;
+    margin-bottom: 8px;
+    padding: 6px;
     background: #f0f0f0;
-    border-radius: 6px;
+    border-radius: 4px;
   }
 
   .term-title {
     font-weight: 600;
     color: #1E3050;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
+    font-size: 12px;
   }
 
   .term-content {
     color: #333;
-    line-height: 1.5;
+    line-height: 1.4;
+    font-size: 11px;
   }
-  
-  .suggestions-card {
-    background: #f0f8ff;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #1976D2;
-  }
-  
-  .intent-card {
-    background: #e8f5e8;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #4caf50;
-  }
-  
-  .reference-card {
-    background: #f3e5f5;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #9c27b0;
-  }
-  
-  .instruction-card {
-    background: #e1f5fe;
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid #00bcd4;
-  }
-  
+
   .feature-content,
   .suggestion-content,
   .intent-content,
   .reference-content,
   .instruction-content {
     color: #333;
-    margin: 8px 0 0 0;
-    line-height: 1.5;
+    margin: 6px 0 0 0;
+    line-height: 1.4;
+    font-size: 12px;
   }
-  
+
   .timestamp {
     color: #666;
-    font-size: 0.9rem;
-    margin: 8px 0 0 0;
+    font-size: 10px;
+    margin: 6px 0 0 0;
   }
   
   .empty-state {
     text-align: center;
     color: #999;
-    padding: 40px 20px;
+    padding: 30px 15px;
+    font-size: 12px;
   }
   
   .remove-ball {
-    font-size: 14px;
+    font-size: 12px;
     color: #909399;
     cursor: pointer;
-    margin-left: 4px;
+    margin-left: 3px;
     transition: all 0.3s;
   }
   
@@ -881,57 +880,76 @@
   }
 
   .group-settings {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
   }
 
   .group-switch {
-    margin-right: 10px;
+    margin-right: 8px;
   }
 
   .group-size-selector {
-    margin-top: 10px;
+    margin-top: 8px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
 
   .group-size-label {
-    font-size: 14px;
+    font-size: 12px;
     color: #606266;
     font-weight: 500;
   }
 
   .analysis-progress {
-    margin-bottom: 20px;
-    padding: 15px;
+    margin-bottom: 15px;
+    padding: 12px;
     background: #f8fafc;
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid #e2e8f0;
   }
 
   .progress-info {
-    margin-bottom: 10px;
-    font-size: 14px;
+    margin-bottom: 8px;
+    font-size: 12px;
     color: #64748b;
     font-weight: 500;
   }
 
   .progress-bar {
     width: 100%;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .current-group {
-    margin-top: 10px;
+    margin-top: 8px;
   }
 
   .current-group-label {
     font-weight: 600;
-    margin-right: 10px;
+    margin-right: 8px;
+    font-size: 12px;
   }
 
   .current-ball-tag {
-    margin-left: 5px;
+    margin-left: 4px;
+  }
+
+  /* 调整Element Plus组件的字体大小 */
+  .analysis-panel :deep(.el-button) {
+    font-size: 12px;
+  }
+
+  .analysis-panel :deep(.el-switch__label) {
+    font-size: 11px;
+  }
+
+  .analysis-panel :deep(.el-radio-button__inner) {
+    font-size: 11px;
+    padding: 8px 12px;
+  }
+
+  .analysis-panel :deep(.el-tag) {
+    font-size: 10px;
   }
   </style>
 

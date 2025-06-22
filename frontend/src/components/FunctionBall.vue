@@ -128,9 +128,9 @@ const handleClick = (e) => {
 
 <style scoped>
 .function-ball {
-  width: 100px;
-  height: 100px;
-  border-radius: 12px;
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
   background: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   cursor: move;
@@ -180,13 +180,13 @@ const handleClick = (e) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   pointer-events: none;
   z-index: 1;
 }
 
 .ball-icon {
-  font-size: 28px;
+  font-size: 22px;
   color: #1E3050;
   transition: color 0.3s;
 }
@@ -200,15 +200,16 @@ const handleClick = (e) => {
 }
 
 .ball-label {
-  font-size: 13px;
+  font-size: 11px;
   color: #1E3050;
   text-align: center;
   font-weight: 500;
-  max-width: 90px;
+  max-width: 72px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   transition: color 0.3s;
+  line-height: 1.2;
 }
 
 .function-ball.is-disabled .ball-label {
@@ -224,8 +225,8 @@ const handleClick = (e) => {
   position: absolute;
   top: -2px;
   right: -2px;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   background: #409EFF;
   border: 2px solid white;
   border-radius: 50%;
@@ -236,7 +237,7 @@ const handleClick = (e) => {
 }
 
 .check-icon {
-  font-size: 12px;
+  font-size: 10px;
   color: white;
 }
 
@@ -244,8 +245,8 @@ const handleClick = (e) => {
   position: absolute;
   top: 4px;
   right: 4px;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   display: flex;
@@ -255,7 +256,7 @@ const handleClick = (e) => {
 }
 
 .lock-icon {
-  font-size: 12px;
+  font-size: 10px;
   color: #909399;
 }
 </style> 
