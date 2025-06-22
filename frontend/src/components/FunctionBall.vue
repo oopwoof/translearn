@@ -95,9 +95,9 @@ const handleDragStart = (e) => {
     } else {
       // 单个拖拽：设置单个功能球数据
       const dragData = {
-    id: props.id,
-    label: props.label,
-    prompt: props.prompt,
+        id: props.id,
+        label: props.label,
+        prompt: props.prompt,
         icon: props.icon,
         selected: props.selected,
         isMultiDrag: false

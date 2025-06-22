@@ -472,11 +472,11 @@
           analyzedBalls.value.add(ballData.id)
           
           ElMessage.success(`恢复了 ${ballData.label} 的历史分析结果`)
-          } else {
-            ElMessage.success(`添加了功能球: ${ballData.label}`)
-          }
+        } else {
+          ElMessage.success(`添加了功能球: ${ballData.label}`)
         }
       }
+    }
     } catch (error) {
       console.error('Drop error:', error)
       ElMessage.error('拖拽处理失败')
