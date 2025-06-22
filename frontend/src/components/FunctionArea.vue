@@ -373,26 +373,63 @@ const handleBallClick = (ball) => {
 
 <style scoped>
 .function-area {
-  background: #f5f7fa;
+  background: rgba(255, 255, 255, 0.05); /* 进一步降低不透明度 */
+  backdrop-filter: blur(15px);
   padding: 8px 15px;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   flex-shrink: 0;
-  border-bottom: 1px solid #e4e7ed;
+  border-bottom: 1px solid rgba(218, 165, 32, 0.3);
   height: 100%;
   display: flex;
   align-items: center;
+  position: relative;
+}
+
+/* 添加顶部装饰线条 */
+.function-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--forest-green) 20%, 
+    var(--deep-green) 50%, 
+    var(--forest-green) 80%, 
+    transparent 100%);
+  opacity: 0.8;
 }
 
 .function-container {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
-  background: white;
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-md);
   padding: 8px 15px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 8px 32px var(--shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(34, 139, 34, 0.4); /* 使用森林绿 */
   position: relative;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
+}
+
+/* 添加内部装饰线条 */
+.function-container::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(34, 139, 34, 0.5) 50%, /* 使用森林绿 */
+    transparent 100%);
 }
 
 .function-grid {
@@ -400,7 +437,7 @@ const handleBallClick = (ball) => {
   justify-content: center;
   gap: 12px;
   padding: 2px;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   flex-wrap: wrap;
   position: relative;
   user-select: none;
@@ -417,25 +454,38 @@ const handleBallClick = (ball) => {
   transform: translateX(-50%);
   width: 24px;
   height: 24px;
-  background: white;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(34, 139, 34, 0.6); /* 使用森林绿 */
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s;
+  box-shadow: 
+    0 4px 16px var(--shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
   z-index: 1;
 }
 
 .expand-button:hover {
   transform: translateX(-50%) scale(1.1);
+  background: var(--forest-green);
+  color: white;
+  box-shadow: 
+    0 6px 20px var(--shadow-medium),
+    0 0 20px rgba(34, 139, 34, 0.6); /* 使用森林绿光晕 */
 }
 
 .expand-button .el-icon {
   font-size: 12px;
-  color: #1E3050;
-  transition: transform 0.3s;
+  color: var(--text-dark);
+  transition: all 0.3s ease;
+}
+
+.expand-button:hover .el-icon {
+  color: white;
 }
 
 .expand-button .is-expanded {
@@ -453,36 +503,38 @@ const handleBallClick = (ball) => {
 
 .selection-box {
   position: absolute;
-  border: 2px dashed #409EFF;
-  background: rgba(64, 158, 255, 0.1);
+  border: 2px dashed var(--forest-green);
+  background: rgba(34, 139, 34, 0.15); /* 使用森林绿 */
   box-sizing: border-box;
   pointer-events: none;
-  border-radius: 6px;
-  animation: selection-pulse 1s infinite alternate;
+  border-radius: var(--radius-sm);
+  animation: selection-pulse 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes selection-pulse {
   from {
-    border-color: #409EFF;
-    background: rgba(64, 158, 255, 0.1);
+    border-color: var(--forest-green);
+    background: rgba(34, 139, 34, 0.1); /* 使用森林绿 */
   }
   to {
-    border-color: #66B1FF;
-    background: rgba(64, 158, 255, 0.15);
+    border-color: var(--deep-green);
+    background: rgba(0, 100, 0, 0.2); /* 使用深绿色 */
   }
 }
 
 /* 为选中的功能球添加特殊样式 */
 .function-grid :deep(.function-ball.is-selected) {
-  animation: selected-glow 1.5s infinite alternate;
+  animation: selected-glow 2s ease-in-out infinite alternate;
 }
 
 @keyframes selected-glow {
   from {
-    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+    box-shadow: 0 8px 25px rgba(34, 139, 34, 0.4); /* 使用森林绿 */
+    transform: translateY(-2px);
   }
   to {
-    box-shadow: 0 6px 20px rgba(64, 158, 255, 0.5);
+    box-shadow: 0 12px 35px rgba(0, 100, 0, 0.6); /* 使用深绿色 */
+    transform: translateY(-4px);
   }
 }
 </style> 

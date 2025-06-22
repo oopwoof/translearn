@@ -679,44 +679,130 @@
   
   <style scoped>
   .analysis-panel {
-    background: white;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-md);
     padding: 15px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 
+      0 8px 32px var(--shadow-light),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(34, 139, 34, 0.3); /* 使用森林绿 */
     height: fit-content;
     max-height: calc(100vh - 140px);
     overflow-y: auto;
     font-size: 13px;
+    color: var(--text-dark);
+    position: relative;
   }
   
+  /* 添加顶部装饰线条 */
+  .analysis-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 15px;
+    right: 15px;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      var(--forest-green) 30%, 
+      var(--deep-green) 50%, 
+      var(--forest-green) 70%, 
+      transparent 100%);
+    opacity: 0.7;
+    border-radius: 0 0 2px 2px;
+  }
+  
+  /* 添加侧边装饰线条 */
+  .analysis-panel::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 20px;
+    bottom: 20px;
+    width: 3px;
+    background: linear-gradient(180deg, 
+      transparent 0%, 
+      rgba(34, 139, 34, 0.6) 30%, /* 使用森林绿 */
+      rgba(0, 100, 0, 0.8) 50%, /* 使用深绿色 */
+      rgba(34, 139, 34, 0.6) 70%, /* 使用森林绿 */
+      transparent 100%);
+    border-radius: 0 3px 3px 0;
+  }
+
   .analysis-panel h3 {
     margin: 0 0 15px 0;
-    color: #1E3050;
+    color: var(--text-dark);
     font-size: 16px;
+    font-weight: 700;
+    position: relative;
+    padding-left: 10px;
+  }
+  
+  /* 为标题添加装饰线条 */
+  .analysis-panel h3::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: var(--forest-green);
+    border-radius: 2px;
   }
   
   .ball-drop-zone {
-    background: #f5f7fa;
-    border: 2px dashed #dcdfe6;
-    border-radius: 8px;
+    background: rgba(240, 248, 240, 0.1);
+    backdrop-filter: blur(10px);
+    border: 2px dashed rgba(34, 139, 34, 0.6); /* 使用森林绿 */
+    border-radius: var(--radius-sm);
     padding: 12px;
     margin-bottom: 12px;
     min-height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    position: relative;
   }
   
+  /* 为拖拽区添加角落装饰 */
+  .ball-drop-zone::before,
+  .ball-drop-zone::after {
+    content: '';
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border: 2px solid var(--forest-green);
+    opacity: 0.6;
+  }
+
+  .ball-drop-zone::before {
+    top: 5px;
+    left: 5px;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .ball-drop-zone::after {
+    bottom: 5px;
+    right: 5px;
+    border-left: none;
+    border-top: none;
+  }
+
   .ball-drop-zone.has-balls {
     border-style: solid;
-    border-color: #1E3050;
-    background: #f0f8ff;
+    border-color: var(--forest-green);
+    background: rgba(34, 139, 34, 0.08); /* 使用森林绿 */
+    backdrop-filter: blur(15px);
   }
   
   .drop-hint {
-    color: #909399;
+    color: var(--text-light);
     font-size: 12px;
+    font-style: italic;
   }
   
   .selected-balls {
@@ -726,27 +812,37 @@
   }
   
   .selected-ball {
-    background: white;
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-sm);
     padding: 6px 8px;
     display: flex;
     align-items: center;
     gap: 4px;
     font-size: 11px;
-    color: #1E3050;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    color: var(--text-dark);
+    box-shadow: 
+      0 4px 12px var(--shadow-light),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(34, 139, 34, 0.2); /* 使用森林绿 */
     position: relative;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
   }
 
   .selected-ball.analyzed {
-    background: #f0f9ff;
-    border: 1px solid #3b82f6;
+    background: rgba(34, 139, 34, 0.1); /* 使用森林绿 */
+    border: 1px solid var(--forest-green);
+    color: var(--text-dark);
+    font-weight: 600;
+    box-shadow: 
+      0 4px 12px rgba(34, 139, 34, 0.3), /* 使用森林绿 */
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 
   .selected-ball.pending {
-    background: #fffbeb;
-    border: 1px solid #f59e0b;
+    background: rgba(255, 193, 7, 0.15);
+    border: 1px solid #ffc107;
+    color: #ff8f00;
   }
 
   .ball-status {
@@ -760,11 +856,11 @@
   }
 
   .analyzed-icon {
-    color: #10b981;
+    color: var(--forest-green);
   }
 
   .pending-icon {
-    color: #f59e0b;
+    color: #ff8f00;
     animation: spin 1s linear infinite;
   }
 
@@ -792,52 +888,91 @@
   .intent-card,
   .reference-card,
   .instruction-card {
-    background: #f9f9f9;
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(15px);
+    border-radius: var(--radius-sm);
     padding: 10px;
-    border-left: 3px solid #2E7D32;
+    border-left: 3px solid var(--forest-green); /* 主要使用森林绿 */
+    border: 1px solid rgba(34, 139, 34, 0.2); /* 使用森林绿 */
+    box-shadow: 
+      0 4px 16px var(--shadow-light),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  /* 为卡片添加右侧装饰线条 */
+  .feature-card::after,
+  .terminology-card::after,
+  .suggestions-card::after,
+  .intent-card::after,
+  .reference-card::after,
+  .instruction-card::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 1px;
+    background: linear-gradient(180deg, 
+      transparent 0%, 
+      rgba(34, 139, 34, 0.3) 50%, /* 使用森林绿 */
+      transparent 100%);
+  }
+
+  .feature-card:hover,
+  .terminology-card:hover,
+  .suggestions-card:hover,
+  .intent-card:hover,
+  .reference-card:hover,
+  .instruction-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 25px var(--shadow-medium),
+      inset 0 2px 0 rgba(255, 255, 255, 0.2);
+    border-color: var(--forest-green);
   }
 
   .terminology-card {
-    border-left-color: #1E3050;
+    border-left-color: var(--deep-green);
   }
 
   .suggestions-card {
-    background: #f0f8ff;
-    border-left-color: #1976D2;
+    background: rgba(34, 139, 34, 0.03); /* 使用森林绿 */
+    border-left-color: var(--accent-emerald);
+    /* 金色小点缀 */
   }
 
-  .intent-card {
-    background: #e8f5e8;
-    border-left-color: #4caf50;
-  }
-
-  .reference-card {
-    background: #f3e5f5;
-    border-left-color: #9c27b0;
-  }
-
-  .instruction-card {
-    background: #e1f5fe;
-    border-left-color: #00bcd4;
+  .suggestions-card::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 4px;
+    height: 4px;
+    background: var(--desert-gold);
+    border-radius: 50%;
+    opacity: 0.7;
   }
 
   .term-analysis {
     margin-bottom: 8px;
     padding: 6px;
-    background: #f0f0f0;
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border);
   }
 
   .term-title {
     font-weight: 600;
-    color: #1E3050;
+    color: var(--text-dark);
     margin-bottom: 3px;
     font-size: 12px;
   }
 
   .term-content {
-    color: #333;
+    color: var(--text-medium);
     line-height: 1.4;
     font-size: 11px;
   }
@@ -847,40 +982,47 @@
   .intent-content,
   .reference-content,
   .instruction-content {
-    color: #333;
+    color: var(--text-medium);
     margin: 6px 0 0 0;
     line-height: 1.4;
     font-size: 12px;
   }
 
   .timestamp {
-    color: #666;
+    color: var(--text-light);
     font-size: 10px;
     margin: 6px 0 0 0;
+    font-style: italic;
   }
   
   .empty-state {
     text-align: center;
-    color: #999;
+    color: var(--text-light);
     padding: 30px 15px;
     font-size: 12px;
+    font-style: italic;
   }
   
   .remove-ball {
     font-size: 12px;
-    color: #909399;
+    color: var(--text-light);
     cursor: pointer;
     margin-left: 3px;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
   }
   
   .remove-ball:hover {
-    color: #F56C6C;
-    transform: scale(1.1);
+    color: #f44336;
+    transform: scale(1.2);
   }
 
   .group-settings {
     margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border);
   }
 
   .group-switch {
@@ -896,22 +1038,24 @@
 
   .group-size-label {
     font-size: 12px;
-    color: #606266;
+    color: var(--text-medium);
     font-weight: 500;
   }
 
   .analysis-progress {
     margin-bottom: 15px;
     padding: 12px;
-    background: #f8fafc;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
+    background: rgba(248, 250, 252, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 16px var(--shadow-light);
   }
 
   .progress-info {
     margin-bottom: 8px;
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-medium);
     font-weight: 500;
   }
 
@@ -928,28 +1072,64 @@
     font-weight: 600;
     margin-right: 8px;
     font-size: 12px;
+    color: var(--text-dark);
   }
 
   .current-ball-tag {
     margin-left: 4px;
   }
 
-  /* 调整Element Plus组件的字体大小 */
+  /* 调整Element Plus组件的样式 */
   .analysis-panel :deep(.el-button) {
     font-size: 12px;
+    background: linear-gradient(135deg, var(--forest-green) 0%, var(--accent-emerald) 100%);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(34, 139, 34, 0.3); /* 使用森林绿 */
+  }
+
+  .analysis-panel :deep(.el-button:hover) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(34, 139, 34, 0.4); /* 使用森林绿 */
   }
 
   .analysis-panel :deep(.el-switch__label) {
     font-size: 11px;
+    color: var(--text-medium);
   }
 
   .analysis-panel :deep(.el-radio-button__inner) {
     font-size: 11px;
     padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--glass-border);
+    color: var(--text-dark);
+  }
+
+  .analysis-panel :deep(.el-radio-button__original:checked + .el-radio-button__inner) {
+    background: var(--forest-green);
+    border-color: var(--forest-green);
+    color: white;
   }
 
   .analysis-panel :deep(.el-tag) {
     font-size: 10px;
+    background: rgba(34, 139, 34, 0.1); /* 使用森林绿 */
+    border-color: var(--forest-green);
+    color: var(--text-dark);
+  }
+
+  .analysis-panel :deep(.el-progress-bar__outer) {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+  }
+
+  .analysis-panel :deep(.el-progress-bar__inner) {
+    background: linear-gradient(135deg, var(--forest-green) 0%, var(--accent-emerald) 100%);
+    border-radius: 10px;
   }
   </style>
 

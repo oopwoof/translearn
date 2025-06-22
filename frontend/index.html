@@ -1,13 +1,42 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" style="
+  width: 100%; 
+  height: 100%; 
+  margin: 0; 
+  padding: 0; 
+  background: linear-gradient(135deg, #d5f0d5 0%, #e8f5e8 50%, #b8e6b8 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>中阿双语翻译系统</title>
   </head>
-  <body>
-    <div id="app"></div>
+  <body style="
+    width: 100vw; 
+    height: 100vh; 
+    margin: 0; 
+    padding: 0; 
+    background: linear-gradient(135deg, #d5f0d5 0%, #e8f5e8 50%, #b8e6b8 100%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+  ">
+    <div id="app" style="
+      width: 100vw; 
+      height: 100vh; 
+      margin: 0; 
+      padding: 0; 
+      background: inherit;
+      overflow: hidden;
+    "></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

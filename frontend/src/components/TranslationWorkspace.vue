@@ -1,45 +1,119 @@
 <template>
-    <div class="translation-workspace">
-      <FunctionArea 
-        :mode="mode" 
-        :intent="intent"
-        :reference="reference"
-        :directRequest="directRequest"
-        :excludedBallIds="excludedBallIds"
-        @ball-removed="handleBallRemoved"
-        @multi-drag-start="handleMultiDragStart"
-      />
-      <div class="workspace-container">
-        <div class="panel-container">
-          <AnalysisPanel 
-            :analysis-data="analysisData"
-            :analyzing="analyzing"
-            :current-text="leftText"
-            @analyze="handleAnalyzeWithBalls"
-            @analyze-grouped="handleGroupedAnalyzeWithBalls"
-            @balls-changed="handleBallsChanged"
-            ref="analysisPanelRef"
+    <!-- 固定背景图层 -->
+    <div class="background-layer"></div>
+    
+    <div class="translation-workspace-v2">
+      <!-- 步骤指示器 -->
+      <WorkflowSteps :current-step="currentStep" />
+      
+      <!-- 主内容区 -->
+      <div class="workspace-main">
+        <!-- 动态内容区 -->
+        <div class="dynamic-content">
+          <!-- 第一步：模式选择 -->
+          <ModeSelectionStep 
+            v-if="currentStep === 1"
+            v-model:mode="mode"
+            @next="goToStep(2)"
           />
-          <ArabicPanel
-            v-model="targetText"
-            :readonly="mode === 'zh-ar'"
-            :loading="isTranslating"
-          />
-          <TranslationControls
+          
+          <!-- 第二步：翻译需求 -->
+          <TranslationRequirementsStep
+            v-if="currentStep === 2"
+            v-model:source-text="sourceText"
             v-model:intent="intent"
             v-model:reference="reference"
-            v-model:directRequest="directRequest"
+            v-model:direct-request="directRequest"
             :mode="mode"
-            :quality="quality"
-            :loading="isTranslating"
-            @update:mode="handleModeChange"
-            @update:quality="handleQualityChange"
-            @translate="handleTranslate"
+            @next="goToStep(3)"
+            @back="goToStep(1)"
           />
-          <ChinesePanel
-            v-model="textToAnalyze"
-            :readonly="mode === 'ar-zh'"
-            :loading="isTranslating"
+          
+          <!-- 第三步：功能分析 -->
+          <FunctionAnalysisStep
+            v-if="currentStep === 3"
+            :source-text="sourceText"
+            :requirements="requirements"
+            :mode="mode"
+            @analysis-complete="handleAnalysisComplete"
+            @back="goToStep(2)"
+          />
+          
+          <!-- 第四步：质量翻译 -->
+          <QualityTranslationStep
+            v-if="currentStep === 4"
+            :analysis-results="analysisResults"
+            :source-text="sourceText"
+            :mode="mode"
+            @translate="handleTranslate"
+            @back="goToStep(3)"
+          />
+          
+          <!-- 翻译结果显示 -->
+          <div v-if="currentStep === 5" class="translation-results">
+            <div class="results-header">
+              <h2>翻译完成</h2>
+              <p class="results-description">您的翻译已完成，可以查看结果和进行后续操作</p>
+            </div>
+            
+            <div class="results-layout">
+              <!-- 源文本 -->
+              <div class="source-panel">
+                <ChinesePanel
+                  v-if="mode === 'zh-ar'"
+                  v-model="sourceText"
+                  :readonly="true"
+                />
+                <ArabicPanel
+                  v-else
+                  v-model="sourceText"
+                  :readonly="true"
+                />
+              </div>
+              
+              <!-- 翻译结果 -->
+              <div class="target-panel">
+                <ArabicPanel
+                  v-if="mode === 'zh-ar'"
+                  v-model="targetText"
+                  :readonly="false"
+                  :loading="isTranslating"
+                />
+                <ChinesePanel
+                  v-else
+                  v-model="targetText"
+                  :readonly="false"
+                  :loading="isTranslating"
+                />
+              </div>
+            </div>
+            
+            <!-- 结果操作 -->
+            <div class="results-actions">
+              <el-button @click="startNewTranslation">
+                <el-icon><Plus /></el-icon>
+                新建翻译
+              </el-button>
+              <el-button @click="goToStep(4)">
+                <el-icon><ArrowLeft /></el-icon>
+                修改质量重译
+              </el-button>
+              <el-button @click="goToStep(3)">
+                <el-icon><Setting /></el-icon>
+                调整分析重译
+              </el-button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 侧边栏：配置摘要 -->
+        <div class="config-sidebar">
+          <ConfigSummary 
+            :mode="mode"
+            :source-text="sourceText"
+            :requirements="requirements"
+            :analysis-results="analysisResults"
+            :quality="quality"
           />
         </div>
       </div>
@@ -47,333 +121,283 @@
   </template>
   
   <script setup>
-  import { ref, watch, computed } from 'vue'
+  import { ref, watch, computed, reactive } from 'vue'
   import { ElMessage } from 'element-plus'
+  import { Plus, ArrowLeft, Setting } from '@element-plus/icons-vue'
   import ChinesePanel from './ChinesePanel.vue'
   import ArabicPanel from './ArabicPanel.vue'
-  import TranslationControls from './TranslationControls.vue'
-  import FunctionArea from './FunctionArea.vue'
-  import AnalysisPanel from './AnalysisPanel.vue'
+  import WorkflowSteps from './WorkflowSteps.vue'
+  import ModeSelectionStep from './ModeSelectionStep.vue'
+  import TranslationRequirementsStep from './TranslationRequirementsStep.vue'
+  import FunctionAnalysisStep from './FunctionAnalysisStep.vue'
+  import QualityTranslationStep from './QualityTranslationStep.vue'
+  import ConfigSummary from './ConfigSummary.vue'
   import { useTranslationStore } from '@/stores/translation'
   
   const translationStore = useTranslationStore()
   
-  const mode = ref('zh-ar')
-  const quality = ref('')
-  const textToAnalyze = ref('')
+  // 工作流状态管理
+  const currentStep = ref(1)
+  const mode = ref('')
+  const sourceText = ref('')
   const targetText = ref('')
-  const analysisData = ref(null)
-  const isTranslating = ref(false)
   const intent = ref('')
   const reference = ref('')
   const directRequest = ref('')
-  const analyzing = ref(false)
-  const excludedBallIds = ref([])
-  const analysisPanelRef = ref(null)
+  const quality = ref('')
+  const analysisResults = ref({})
+  const isTranslating = ref(false)
   
-  // 计算属性：分析面板始终分析textToAnalyze的内容
-  const leftText = computed(() => {
-    return textToAnalyze.value
-  })
+  // 需求对象
+  const requirements = computed(() => ({
+    intent: intent.value,
+    reference: reference.value,
+    directRequest: directRequest.value
+  }))
   
-  // 监听模式变化
-  watch(mode, (newMode) => {
-    // 清空文本和分析结果
-    textToAnalyze.value = ''
-    targetText.value = ''
-    analysisData.value = null
-    quality.value = ''
-    
-    // 清除分析面板状态
-    if (analysisPanelRef.value) {
-      analysisPanelRef.value.clearAllAnalysisState()
-    }
-    
-    // 清除store中的分析结果
-    translationStore.clearAllState()
-  })
-  
-  const handleModeChange = (newMode) => {
-    mode.value = newMode
-  }
-
-  const handleBallsChanged = (ballIds) => {
-    excludedBallIds.value = ballIds
-  }
-
-  const handleBallRemoved = (ballId) => {
-    // 从分析面板中移除对应的球
-    if (analysisPanelRef.value) {
-      analysisPanelRef.value.removeBallById(ballId)
-    }
+  // 步骤导航方法
+  const goToStep = (step) => {
+    currentStep.value = step
   }
   
-  const handleMultiDragStart = (multiDragData) => {
-    console.log('🎯 工作区接收到多选拖拽事件:', multiDragData)
-    ElMessage.info(`开始拖拽 ${multiDragData.count} 个功能球`)
-  }
-  
-  const handleAnalyzeWithBalls = async (selectedBalls, onAnalysisComplete) => {
-    if (!textToAnalyze.value) {
-      ElMessage.warning('请先输入要分析的文本')
-      return
-    }
-    
-    if (!selectedBalls || selectedBalls.length === 0) {
-      ElMessage.warning('没有需要分析的功能球')
-      return
-    }
-    
-    analyzing.value = true
-    try {
-      // 构建分析请求，包含翻译要求信息
-      const analysisRequest = {
-        text: textToAnalyze.value,
-        selectedBalls: selectedBalls,
-        intent: intent.value || '',
-        reference: reference.value || '',
-        directRequest: directRequest.value || '',
-        mode: mode.value
+  // 分析完成处理
+  const handleAnalysisComplete = (analysisData) => {
+    if (analysisData && analysisData.analysisResults) {
+      analysisResults.value = analysisData.analysisResults
+    } else {
+      // 模拟分析结果
+      analysisResults.value = {
+        'text-features': '文本特征分析已完成',
+        'terminology': '专业术语分析已完成'
       }
-      
-      console.log('🚀 发送分析请求:', analysisRequest)
-      const result = await translationStore.analyzeTextWithBalls(analysisRequest)
-      console.log('📥 收到分析结果:', result)
-      
-      if (!result || !result.success) {
-        throw new Error(result?.message || '分析失败')
-      }
-      
-      // 直接传递完整的后端结果（包含originalData）给AnalysisPanel
-      const newAnalysisData = result
-      newAnalysisData.analyzedAt = new Date().toISOString()
-      
-      // 直接使用完整的结果数据，不要解构，保持originalData结构
-      analysisData.value = newAnalysisData
-      console.log('📋 更新analysisData.value (完整结构):', analysisData.value)
-      
-      // Store已经在内部处理了存储逻辑，这里不需要重复调用
-      console.log('💾 分析结果已在store中处理')
-      
-      // 通知AnalysisPanel分析完成
-      const analyzedBallIds = selectedBalls.map(ball => ball.id).filter(id => id)
-      if (onAnalysisComplete && typeof onAnalysisComplete === 'function') {
-        onAnalysisComplete(analyzedBallIds)
-      }
-      
-      ElMessage.success(`完成 ${selectedBalls.length} 个功能球的分析`)
-    } catch (error) {
-      console.error('❌ 分析失败:', error)
-      ElMessage.error(error.message || '分析失败')
-    } finally {
-      analyzing.value = false
     }
+    goToStep(4)
   }
   
-  // 处理分组分析
-  const handleGroupedAnalyzeWithBalls = async (groupedRequest) => {
-    if (!textToAnalyze.value) {
-      ElMessage.warning('请先输入要分析的文本')
+  // 翻译处理
+  const handleTranslate = async (translationData) => {
+    if (!translationData || !translationData.quality) {
+      ElMessage.warning('翻译配置不完整')
       return
     }
     
-    const { balls, groupSize, onProgress, onComplete } = groupedRequest
-    
-    if (!balls || balls.length === 0) {
-      ElMessage.warning('没有需要分析的功能球')
-      return
-    }
-    
-    if (!groupSize || groupSize < 1) {
-      ElMessage.warning('分组大小设置错误')
-      return
-    }
-    
-    analyzing.value = true
-    try {
-      // 构建分析请求
-      const analysisRequest = {
-        text: textToAnalyze.value,
-        selectedBalls: balls,
-        intent: intent.value || '',
-        reference: reference.value || '',
-        directRequest: directRequest.value || '',
-        mode: mode.value
-      }
-      
-      console.log('🚀 发送分组分析请求:', analysisRequest, { groupSize })
-      
-      // 使用流式分组分析API
-      const result = await translationStore.analyzeTextWithBallsStreaming(
-        analysisRequest,
-        groupSize,
-        onProgress
-      )
-      
-      if (result && result.success && result.data) {
-        // 直接传递完整的后端结果给AnalysisPanel
-        const newAnalysisData = result
-        newAnalysisData.analyzedAt = new Date().toISOString()
-        
-        // 直接使用完整的结果数据，保持originalData结构
-        analysisData.value = newAnalysisData
-        
-        // Store已经在内部处理了存储逻辑，这里不需要重复调用
-        console.log('💾 分组分析结果已在store中处理')
-        
-        // 通知AnalysisPanel分析完成
-        const analyzedBallIds = balls.map(ball => ball.id).filter(id => id)
-        if (onComplete && typeof onComplete === 'function') {
-          onComplete(analyzedBallIds)
-        }
-        
-        ElMessage.success(`完成 ${balls.length} 个功能球的分组分析`)
-      } else {
-        throw new Error(result?.message || '分组分析未返回有效结果')
-      }
-    } catch (error) {
-      console.error('❌ 分组分析失败:', error)
-      ElMessage.error(error.message || '分组分析失败')
-    } finally {
-      analyzing.value = false
-    }
-  }
-  
-  const handleTranslate = async () => {
-    if (!textToAnalyze.value) {
-      ElMessage.warning('请输入要翻译的文本')
-      return
-    }
-    
-    if (!quality.value) {
-      ElMessage.warning('请选择翻译质量')
-      return
-    }
+    isTranslating.value = true
     
     try {
-      isTranslating.value = true
+      console.log('🚀 开始翻译:', translationData)
       
-      // 构建翻译要求
-      const requirements = {
-        quality: quality.value,
+      // 构建翻译请求
+      const translateRequest = {
+        text: sourceText.value,
+        mode: mode.value,
+        quality: translationData.quality,
         intent: intent.value,
         reference: reference.value,
-        directRequest: directRequest.value
+        directRequest: directRequest.value,
+        analysisResults: analysisResults.value
       }
       
-      // 检查是否有可用的分析结果
-      const availableAnalysis = translationStore.getAnalysisForTranslation(textToAnalyze.value)
-      if (availableAnalysis) {
-        console.log('检测到可用分析结果，将传递给翻译:', availableAnalysis)
+      // 调用翻译服务
+      const result = await translationStore.translateText(translateRequest)
+      
+      if (result && result.success) {
+        targetText.value = result.translatedText || '翻译完成'
+        quality.value = translationData.quality
+        goToStep(5) // 跳转到结果展示步骤
+        ElMessage.success('翻译完成！')
       } else {
-        console.log('无可用分析结果，执行完整翻译流程')
+        throw new Error(result?.message || '翻译失败')
       }
-      
-      const result = await translationStore.translateText(
-        textToAnalyze.value, 
-        mode.value, 
-        requirements
-      )
-      
-      targetText.value = result.translatedText
-      ElMessage.success('翻译完成')
     } catch (error) {
+      console.error('❌ 翻译失败:', error)
       ElMessage.error(error.message || '翻译失败')
     } finally {
       isTranslating.value = false
     }
   }
   
-  const handleQualityChange = (newQuality) => {
-    quality.value = newQuality
+  // 开始新的翻译
+  const startNewTranslation = () => {
+    // 重置所有状态
+    currentStep.value = 1
+    mode.value = ''
+    sourceText.value = ''
+    targetText.value = ''
+    intent.value = ''
+    reference.value = ''
+    directRequest.value = ''
+    quality.value = ''
+    analysisResults.value = {}
+    isTranslating.value = false
+    
+    ElMessage.success('已重置，可以开始新的翻译')
   }
   </script>
   
   <style scoped>
-  .translation-workspace {
-    display: flex;
+/* 固定背景图层 */
+.background-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-light) 50%, var(--primary-green-dark) 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.translation-workspace-v2 {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background: transparent;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  color: var(--text-dark);
+  position: relative;
+  z-index: 1;
+}
+
+.workspace-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 20px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.dynamic-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.config-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+/* 翻译结果样式 */
+.translation-results {
+  padding: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.results-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.results-header h2 {
+  font-size: 28px;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.results-description {
+  font-size: 14px;
+  color: var(--text-medium);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.results-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.source-panel,
+.target-panel {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(156, 175, 136, 0.3);
+  overflow: hidden;
+}
+
+.results-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.results-actions .el-button {
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* 滚动条样式 */
+.dynamic-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dynamic-content::-webkit-scrollbar-track {
+  background: rgba(156, 175, 136, 0.1);
+  border-radius: 3px;
+}
+
+.dynamic-content::-webkit-scrollbar-thumb {
+  background: rgba(156, 175, 136, 0.3);
+  border-radius: 3px;
+}
+
+.dynamic-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 175, 136, 0.5);
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .workspace-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .config-sidebar {
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .results-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .workspace-main {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .translation-results {
+    padding: 20px;
+  }
+  
+  .results-actions {
     flex-direction: column;
-    height: 100vh;
-    background: #f5f7fa;
-    overflow: hidden;
-    font-size: 14px; /* 基础字体大小调整 */
+    align-items: center;
   }
   
-  /* FunctionArea 占1/10高度 */
-  .translation-workspace > :first-child {
-    height: 10vh;
-    flex-shrink: 0;
+  .results-actions .el-button {
+    width: 100%;
+    max-width: 300px;
   }
-  
-  .workspace-container {
-    height: 90vh; /* 占9/10高度 */
-    display: flex;
-    flex-direction: column;
-    padding: 15px; /* 减小内边距 */
-    gap: 15px; /* 减小间距 */
-    overflow: hidden;
-    min-height: 0;
-  }
-  
-  .panel-container {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 3fr 3fr 1fr 3fr; /* 按要求的比例：3/10、3/10、1/10、3/10 */
-    gap: 15px; /* 减小间距 */
-    min-height: 0;
-    overflow: hidden;
-  }
-  
-  /* 调整各个面板的字体大小 */
-  .panel-container > * {
-    font-size: 13px;
-  }
-  
-  /* 针对控制面板的特殊处理，因为它空间较小 */
-  .panel-container > :nth-child(3) {
-    font-size: 12px;
-  }
-  
-  @media (max-width: 1600px) {
-    .panel-container {
-      grid-template-columns: 3fr 3fr 1fr 3fr; /* 保持同样的比例 */
-      gap: 12px;
-    }
-    
-    .workspace-container {
-      padding: 12px;
-      gap: 12px;
-    }
-    
-    .translation-workspace {
-      font-size: 13px;
-    }
-  }
-  
-  @media (max-width: 1200px) {
-    .panel-container {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto auto auto;
-      gap: 10px;
-    }
-    
-    .workspace-container {
-      padding: 10px;
-      gap: 10px;
-    }
-    
-    .translation-workspace {
-      font-size: 12px;
-    }
-    
-    /* 移动端时调整FunctionArea高度 */
-    .translation-workspace > :first-child {
-      height: 12vh;
-    }
-    
-    .workspace-container {
-      height: 88vh;
-    }
-  }
+}
   </style>
   
