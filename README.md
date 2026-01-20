@@ -744,13 +744,28 @@ data: {"type":"complete","mergedResult":{...},"totalGroups":2}
 
 ## 📚 Project Documentation
 
-- [README.md](./read.me/README.md) - Project introduction and usage guide
-- [DEMO.md](./read.me/DEMO.md) - Feature demonstration
-- [DYNAMIC_PROMPT_IMPLEMENTATION.md](./read.me/DYNAMIC_PROMPT_IMPLEMENTATION.md) - Dynamic prompt implementation
-- [CLAUDE_RESPONSE_FLOW.md](./read.me/CLAUDE_RESPONSE_FLOW.md) - Claude response parsing flow
-- [STANDARD_MODE_TWO_STEP_IMPLEMENTATION.md](./read.me/STANDARD_MODE_TWO_STEP_IMPLEMENTATION.md) - Standard mode two-step implementation
-- [TRANSLATION_DIFFERENCES.md](./read.me/TRANSLATION_DIFFERENCES.md) - Translation differences analysis
-- [LOG_VIEWING_GUIDE.md](./read.me/LOG_VIEWING_GUIDE.md) - Log viewing guide
+### English Documentation (EN)
+
+- [README.md](./read.me/EN/README.md) - Project introduction and usage guide
+- [DEMO.md](./read.me/EN/DEMO.md) - Feature demonstration
+- [DYNAMIC_PROMPT_IMPLEMENTATION.md](./read.me/EN/DYNAMIC_PROMPT_IMPLEMENTATION.md) - Dynamic prompt implementation
+- [CLAUDE_RESPONSE_FLOW.md](./read.me/EN/CLAUDE_RESPONSE_FLOW.md) - Claude response parsing flow
+- [STANDARD_MODE_TWO_STEP_IMPLEMENTATION.md](./read.me/EN/STANDARD_MODE_TWO_STEP_IMPLEMENTATION.md) - Standard mode two-step implementation
+- [TRANSLATION_DIFFERENCES.md](./read.me/EN/TRANSLATION_DIFFERENCES.md) - Translation differences analysis
+- [LOG_VIEWING_GUIDE.md](./read.me/EN/LOG_VIEWING_GUIDE.md) - Log viewing guide
+
+### Chinese Documentation (CH)
+
+- [README.md](./read.me/CH/README.md) - 项目介绍和使用指南
+- [DEMO.md](./read.me/CH/DEMO.md) - 功能演示
+- [DYNAMIC_PROMPT_IMPLEMENTATION.md](./read.me/CH/DYNAMIC_PROMPT_IMPLEMENTATION.md) - 动态 Prompt 实现
+- [CLAUDE_RESPONSE_FLOW.md](./read.me/CH/CLAUDE_RESPONSE_FLOW.md) - Claude 响应解析流程
+- [STANDARD_MODE_TWO_STEP_IMPLEMENTATION.md](./read.me/CH/STANDARD_MODE_TWO_STEP_IMPLEMENTATION.md) - 标准模式分步化实现
+- [TRANSLATION_DIFFERENCES.md](./read.me/CH/TRANSLATION_DIFFERENCES.md) - 翻译模式差异分析
+- [LOG_VIEWING_GUIDE.md](./read.me/CH/LOG_VIEWING_GUIDE.md) - 日志查看指南
+
+### Additional Documentation
+
 - [final-requirements-verification.md](./final-requirements-verification.md) - Requirements verification report
 
 ---
