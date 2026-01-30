@@ -4,6 +4,7 @@
 > Chinese-Arabic bidirectional translation system powered by Claude (Anthropic), featuring dynamic prompt assembly, analysis reuse architecture, and quality-tiered workflows
 
 ---
+<img width="1902" height="943" alt="image" src="https://github.com/user-attachments/assets/6850e304-7d2d-44e4-a675-a3ec9031b879" />
 
 ## 📋 Project Overview
 
